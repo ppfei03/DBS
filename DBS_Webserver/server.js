@@ -19,6 +19,11 @@ app.use((req, res, next) => {
     next();
 });
 
+// Standardroute für den Zugriff auf index.html
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 // API-Route, um Daten aus DynamoDB zu holen
 app.get('/api/data/BoxesTable', async (req, res) => {
     const params = {
