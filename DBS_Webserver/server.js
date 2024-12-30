@@ -135,6 +135,24 @@ app.get('/run-python/deleteData', (req, res) => {
         });
     });
 
+app.get('/run-python/deleteAllData', (req, res) => {
+        // Relativer Pfad zum Python-Skript
+        const scriptPath = path.join(__dirname, 'scripts', 'deleteAllItems.py');
+        
+            exec(`python3 ${scriptPath}`, (error, stdout, stderr) => {
+                if (error) {
+                    console.error(`Fehler beim Ausführen des Python-Skripts: ${error.message}`);
+                    return res.status(500).send('Fehler beim Ausführen des Skripts.');
+                }
+                if (stderr) {
+                    console.error(`Fehler im Python-Skript: ${stderr}`);
+                    return res.status(500).send(`Fehler im Skript: ${stderr}`);
+                }
+                console.log(`Ergebnis des Python-Skripts: ${stdout}`);
+                res.send(`Skript erfolgreich ausgeführt: ${stdout}`);
+            });
+        });
+
 // Server starten
 app.listen(PORT, () => {
     console.log(`Server läuft auf http://localhost:${PORT}`);

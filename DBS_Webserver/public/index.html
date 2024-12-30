@@ -93,7 +93,7 @@
             outputDiv.textContent = 'Python-Skript wird ausgeführt...';
     
             try {
-                const response = await fetch('/run-python/deleteData');
+                const response = await fetch('/run-python/deleteAllData');
                 const result = await response.text();
                 outputDiv.textContent = `Ergebnis: ${result}`;
             } catch (error) {
