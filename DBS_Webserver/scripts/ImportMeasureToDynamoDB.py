@@ -2,7 +2,7 @@ import boto3
 import requests
 
 # DynamoDB-Client erstellen
-dynamodb = boto3.resource('dynamodb', region_name='us-east-1')  # Region anpassen
+dynamodb = boto3.resource('dynamodb', region_name='us-east-2')  # Region anpassen
 sensors_table = dynamodb.Table("SensorsTable")
 measurements_table = dynamodb.Table("MeasurementsTable")
 
