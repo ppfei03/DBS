@@ -3,7 +3,7 @@ import boto3
 from decimal import Decimal
 
 # DynamoDB Clients
-dynamodb = boto3.resource('dynamodb', region_name='us-east-2')
+dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
 boxes_table = dynamodb.Table('BoxesTable')
 sensors_table = dynamodb.Table('SensorsTable')
 measurements_table = dynamodb.Table('MeasurementsTable')

@@ -7,7 +7,7 @@ const app = express();
 const PORT = 3000;
 
 // DynamoDB Client konfigurieren
-const dynamoDbClient = new DynamoDBClient({ region: 'us-east-2' });
+const dynamoDbClient = new DynamoDBClient({ region: 'us-east-1' });
 
 // Statische Dateien bereitstellen
 app.use(express.static('public'));

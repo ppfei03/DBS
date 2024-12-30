@@ -4,20 +4,6 @@ import time
 # DynamoDB-Client erstellen
 dynamodb = boto3.client('dynamodb', region_name='us-east-1')  # Passen Sie die Region an
 
-# Tabelle löschen
-def delete_table(table_name):
-    try:
-        print(f"Lösche Tabelle: {table_name}...")
-        dynamodb.delete_table(TableName=table_name)
-        # Warten, bis die Tabelle gelöscht wurde
-        waiter = dynamodb.get_waiter('table_not_exists')
-        waiter.wait(TableName=table_name)
-        print(f"Tabelle '{table_name}' erfolgreich gelöscht.")
-    except dynamodb.exceptions.ResourceNotFoundException:
-        print(f"Tabelle '{table_name}' existiert nicht und kann nicht gelöscht werden.")
-    except Exception as e:
-        print(f"Fehler beim Löschen der Tabelle '{table_name}': {e}")
-
 # Tabelle erstellen
 def create_table(params):
     try:
@@ -80,6 +66,4 @@ tables = [
 
 # Tabellen löschen und neu erstellen
 for table in tables:
-    delete_table(table["TableName"])
-    time.sleep(5)  # Kurze Wartezeit, um sicherzustellen, dass die Löschung vollständig ist
     create_table(table)
