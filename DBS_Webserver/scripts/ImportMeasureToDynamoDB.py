@@ -52,7 +52,7 @@ def main():
         box_id = sensor['boxId']['S']
         sensor_id = sensor['sensorId']['S']
         measurements = fetch_sensor_data(box_id, sensor_id)
-        
+        print(sensor)
         if measurements:
             import_measurements(box_id, sensor_id, measurements)
 
