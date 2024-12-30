@@ -2,7 +2,7 @@ import boto3
 import time
 
 # DynamoDB-Client erstellen
-dynamodb = boto3.client('dynamodb', region_name='us-east-1')  # Passen Sie die Region an
+dynamodb = boto3.client('dynamodb', region_name='us-east-2')  # Passen Sie die Region an
 
 # Tabelle löschen
 def delete_table(table_name):
