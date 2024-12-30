@@ -75,9 +75,8 @@
         <thead>
             <tr>
                 <th>Sensor ID</th>
-                <th>unit</th>
+                <th>value</th>
                 <th>Box ID</th>
-                <th>type</th>
             </tr>
         </thead>
         <tbody id="data-list"></tbody>
@@ -105,16 +104,14 @@
                 const tbody = document.getElementById('data-list');
                 items.forEach(item => {
                     const sensorId = item.sensorId?.S || 'N/A';
-                    const unit = item.unit?.S || 'N/A';
+                    const value = item.value?.S || 'N/A';
                     const boxId = item.boxId?.S || 'N/A';
-                    const type = item.type?.S || 'N/A';
 
                     const row = `
                         <tr>
                             <td>${sensorId}</td>
-                            <td>${unit}</td>
+                            <td>${value}</td>
                             <td>${boxId}</td>
-                            <td>${type}</td>
                         </tr>
                     `;
                     tbody.innerHTML += row;
