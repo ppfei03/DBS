@@ -70,16 +70,30 @@
     </div>
     <h1>Willkommen auf dieser Seite...</h1>
 
-    <button id="run-script-button">Python-Skript ausführen</button>
+    <button id="run-script-button-insert">Python-Skript ausführen</button>
+    <button id="run-script-button-delete">Python-Skript ausführen</button>
     <div id="script-output"></div>
     
     <script>
-        document.getElementById('run-script-button').addEventListener('click', async () => {
+        document.getElementById('run-script-button-insert').addEventListener('click', async () => {
             const outputDiv = document.getElementById('script-output');
             outputDiv.textContent = 'Python-Skript wird ausgeführt...';
     
             try {
-                const response = await fetch('/run-python');
+                const response = await fetch('/run-python/insertData');
+                const result = await response.text();
+                outputDiv.textContent = `Ergebnis: ${result}`;
+            } catch (error) {
+                console.error('Fehler beim Ausführen des Python-Skripts:', error);
+                outputDiv.textContent = 'Fehler beim Ausführen des Python-Skripts.';
+            }
+        });
+        document.getElementById('run-script-button-delete').addEventListener('click', async () => {
+            const outputDiv = document.getElementById('script-output');
+            outputDiv.textContent = 'Python-Skript wird ausgeführt...';
+    
+            try {
+                const response = await fetch('/run-python/deleteData');
                 const result = await response.text();
                 outputDiv.textContent = `Ergebnis: ${result}`;
             } catch (error) {
