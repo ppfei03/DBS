@@ -23,6 +23,7 @@ def import_measurements(box_id, sensor_id, measurements):
     with measurements_table.batch_writer() as batch:
         for measurement in measurements:
             item = {
+                "boxId": box_id,  
                 "createdAt": measurement['createdAt'],
                 "sensorId": sensor_id,
                 "value": measurement['value']
