@@ -1,7 +1,7 @@
 import boto3
 
 # DynamoDB-Client erstellen
-dynamodb = boto3.resource('dynamodb', region_name='us-east-1')  # Region anpassen
+dynamodb = boto3.resource('dynamodb', region_name='us-east-2')  # Region anpassen
 
 # Funktion zum Löschen aller Einträge in einer Tabelle
 def delete_all_items(table_name):
