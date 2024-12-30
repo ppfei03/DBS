@@ -82,7 +82,7 @@
             outputDiv.textContent = 'Python-Skript wird ausgeführt...';
     
             try {
-                const response = await fetch('/run-python/insertData');
+                const response = await fetch('http://34.228.6.222:3000/run-python/insertData');
                 const result = await response.text();
                 outputDiv.textContent = `Ergebnis: ${result}`;
             } catch (error) {
@@ -95,7 +95,7 @@
             outputDiv.textContent = 'Python-Skript wird ausgeführt...';
     
             try {
-                const response = await fetch('/run-python/deleteAllData');
+                const response = await fetch('http://34.228.6.222:3000/run-python/deleteAllData');
                 const result = await response.text();
                 outputDiv.textContent = `Ergebnis: ${result}`;
             } catch (error) {
@@ -109,7 +109,7 @@
             outputDiv.textContent = 'Python-Skript wird ausgeführt...';
     
             try {
-                const response = await fetch('/run-python/insertDataMeasure');
+                const response = await fetch('http://34.228.6.222:3000/run-python/insertDataMeasure');
                 const result = await response.text();
                 outputDiv.textContent = `Ergebnis: ${result}`;
             } catch (error) {

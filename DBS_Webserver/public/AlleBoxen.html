@@ -100,7 +100,7 @@
             loadingIndicator.style.display = 'block'; // Ladeanzeige einblenden
 
             try {
-                const response = await fetch(`/api/data/BoxesTableLasy?lastKey=${encodeURIComponent(lastEvaluatedKey || '')}`);
+                const response = await fetch(`http://34.228.6.222:3000/api/data/BoxesTableLasy?lastKey=${encodeURIComponent(lastEvaluatedKey || '')}`);
                 const { items, lastKey } = await response.json();
 
                 // Aktualisieren der Tabelle
