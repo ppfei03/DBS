@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daten aus DynamoDB</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <h1>Daten aus DynamoDB</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Box Name</th>
+                <th>Location</th>
+                <th>Box ID</th>
+                <th>State</th>
+            </tr>
+        </thead>
+        <tbody id="data-list">
+            <tr><td colspan="4">Lade Daten...</td></tr>
+        </tbody>
+    </table>
+
+    <script>
+        // Daten von der API abrufen und anzeigen
+        fetch('/api/data')
+            .then(response => response.json())
+            .then(data => {
+                const tbody = document.getElementById('data-list');
+                tbody.innerHTML = ''; // Alte Inhalte entfernen
+
+                data.forEach(item => {
+                    // Extrahieren der Daten aus DynamoDB-Format
+                    const boxName = item.boxName?.S || 'N/A';
+                    const location = item.location?.L
+                        ? item.location.L.map(coord => coord.N).join(', ')
+                        : 'N/A';
+                    const boxId = item.boxId?.S || 'N/A';
+                    const state = item.state?.S || 'N/A';
+
+                    // Neue Zeile zur Tabelle hinzufügen
+                    const row = `
+                        <tr>
+                            <td>${boxName}</td>
+                            <td>${location}</td>
+                            <td>${boxId}</td>
+                            <td>${state}</td>
+                        </tr>
+                    `;
+                    tbody.innerHTML += row;
+                });
+            })
+            .catch(err => {
+                console.error('Fehler:', err);
+                const tbody = document.getElementById('data-list');
+                tbody.innerHTML = '<tr><td colspan="4">Fehler beim Laden der Daten.</td></tr>';
+            });
+    </script>
+</body>
+</html>
