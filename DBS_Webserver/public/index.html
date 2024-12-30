@@ -12,46 +12,34 @@
         h1 {
             color: #333;
         }
-        ul {
-            list-style-type: none;
-            padding: 0;
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
         }
-        li {
-            padding: 10px;
-            margin: 5px 0;
-            background: #f4f4f4;
+        th, td {
             border: 1px solid #ddd;
-            border-radius: 5px;
+            padding: 10px;
+            text-align: left;
         }
-        .buttons {
-            margin: 20px 0;
+        th {
+            background-color: #f4f4f4;
+            color: #333;
         }
-        .button {
-            display: inline-block;
-            margin: 10px;
-            padding: 15px 30px;
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        #loading-indicator {
+            text-align: center;
             font-size: 16px;
             font-weight: bold;
-            color: #fff;
-            background-color: #007bff;
-            border: none;
-            border-radius: 5px;
-            text-decoration: none;
-            transition: background-color 0.3s ease;
-        }
-        .button:hover {
-            background-color: #0056b3;
+            color: #555;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
     <h1>Daten aus DynamoDB</h1>
-
-    <div class="buttons">
-        <a href="AlleBoxen.html" class="button">Alle Boxen</a>
-        <a href="AlleSensoren.html" class="button">Alle Sensoren</a>
-    </div>
-
     <table>
         <thead>
             <tr>
@@ -61,11 +49,12 @@
                 <th>State</th>
             </tr>
         </thead>
-        <tbody id="data-list">
-            <tr><td colspan="4">Lade Daten...</td></tr>
-        </tbody>
+        <tbody id="data-list"></tbody>
     </table>
-    
+
+    <!-- Ladeanzeige -->
+    <div id="loading-indicator">Lade Daten...</div>
+
     <script>
         let lastEvaluatedKey = null; // Startpunkt für Paginierung
         let isLoading = false;
@@ -74,8 +63,11 @@
             if (isLoading) return;
 
             isLoading = true;
+            const loadingIndicator = document.getElementById('loading-indicator');
+            loadingIndicator.style.display = 'block'; // Ladeanzeige einblenden
+
             try {
-                const response = await fetch(`/api/data/SensorsTableLasy?lastKey=${encodeURIComponent(lastEvaluatedKey || '')}`);
+                const response = await fetch(`/api/data?lastKey=${encodeURIComponent(lastEvaluatedKey || '')}`);
                 const { items, lastKey } = await response.json();
 
                 // Aktualisieren der Tabelle
@@ -102,14 +94,18 @@
                 // Setzen des nächsten Startpunkts für die Paginierung
                 lastEvaluatedKey = lastKey;
 
-                // Wenn keine weiteren Daten vorhanden sind, deaktivieren Sie Lazy Loading
+                // Wenn keine weiteren Daten vorhanden sind, Lazy Loading deaktivieren
                 if (!lastKey) {
                     window.removeEventListener('scroll', handleScroll);
+                    loadingIndicator.textContent = 'Alle Daten geladen.';
                 }
             } catch (err) {
                 console.error('Fehler beim Abrufen weiterer Daten:', err);
+                const loadingIndicator = document.getElementById('loading-indicator');
+                loadingIndicator.textContent = 'Fehler beim Laden der Daten.';
             } finally {
                 isLoading = false;
+                loadingIndicator.style.display = lastEvaluatedKey ? 'block' : 'none'; // Ladeanzeige ausblenden, falls keine weiteren Daten
             }
         }
 
