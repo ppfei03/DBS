@@ -24,6 +24,17 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// Dynamisches Routing für andere HTML-Dateien
+app.get('/:file', (req, res) => {
+    const filePath = path.join(__dirname, 'public', req.params.file);
+    res.sendFile(filePath, (err) => {
+        if (err) {
+            console.error(`Fehler beim Laden der Datei: ${filePath}`);
+            res.status(404).send('Seite nicht gefunden');
+        }
+    });
+});;
+
 // API-Route, um Daten aus DynamoDB zu holen
 app.get('/api/data/BoxesTable', async (req, res) => {
     const params = {
