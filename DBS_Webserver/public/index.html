@@ -46,13 +46,25 @@
 </head>
 <body>
     <h1>Daten aus DynamoDB</h1>
-    <ul id="data-list">Lade Daten...</ul>
 
     <div class="buttons">
         <a href="AlleBoxen.html" class="button">Alle Boxen</a>
         <a href="AlleSensoren.html" class="button">Alle Sensoren</a>
     </div>
 
+    <table>
+        <thead>
+            <tr>
+                <th>Box Name</th>
+                <th>Location</th>
+                <th>Box ID</th>
+                <th>State</th>
+            </tr>
+        </thead>
+        <tbody id="data-list">
+            <tr><td colspan="4">Lade Daten...</td></tr>
+        </tbody>
+    </table>
     
     <script>
         let lastEvaluatedKey = null; // Startpunkt für Paginierung
