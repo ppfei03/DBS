@@ -13,7 +13,7 @@ const dynamoDbClient = new DynamoDBClient({ region: 'us-east-1' });
 const cors = require('cors');
 app.use(cors({
     origin: (origin, callback) => {
-        const allowedOrigins = ['https://dbs.philipppfeiffer.de', 'http://3.128.179.156/'];
+        const allowedOrigins = ['https://dbs.philipppfeiffer.de', 'http://3.128.179.156:3000'];
         if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
