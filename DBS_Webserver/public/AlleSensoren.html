@@ -74,10 +74,10 @@
     <table>
         <thead>
             <tr>
-                <th>Box Name</th>
-                <th>Location</th>
+                <th>Sensor ID</th>
+                <th>unit</th>
                 <th>Box ID</th>
-                <th>State</th>
+                <th>type</th>
             </tr>
         </thead>
         <tbody id="data-list"></tbody>
@@ -104,19 +104,17 @@
                 // Aktualisieren der Tabelle
                 const tbody = document.getElementById('data-list');
                 items.forEach(item => {
-                    const boxName = item.boxName?.S || 'N/A';
-                    const location = item.location?.L
-                        ? item.location.L.map(coord => coord.N).join(', ')
-                        : 'N/A';
+                    const sensorId = item.sensorId?.S || 'N/A';
+                    const unit = item.unit?.S || 'N/A';
                     const boxId = item.boxId?.S || 'N/A';
-                    const state = item.state?.S || 'N/A';
+                    const type = item.type?.S || 'N/A';
 
                     const row = `
                         <tr>
-                            <td>${boxName}</td>
-                            <td>${location}</td>
+                            <td>${sensorId}</td>
+                            <td>${unit}</td>
                             <td>${boxId}</td>
-                            <td>${state}</td>
+                            <td>${type}</td>
                         </tr>
                     `;
                     tbody.innerHTML += row;
