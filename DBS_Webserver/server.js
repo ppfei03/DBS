@@ -12,7 +12,14 @@ const dynamoDbClient = new DynamoDBClient({ region: 'us-east-1' });
 
 const cors = require('cors');
 app.use(cors({
-    origin: 'https://dbs.philipppfeiffer.de', // Erlaube nur deine Domain
+    origin: (origin, callback) => {
+        const allowedOrigins = ['https://dbs.philipppfeiffer.de', 'http://3.128.179.156/'];
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Nicht erlaubte Herkunft'));
+        }
+    },
     methods: ['GET', 'POST', 'PUT', 'DELETE']
 }));
 
