@@ -69,5 +69,26 @@
         <a href="AlleSensoren.html" class="button">Alle Sensoren</a>
     </div>
     <h1>Willkommen auf dieser Seite...</h1>
+
+    <button id="run-script">Skript ausführen</button>
+    <div id="output"></div>
+
+    <script>
+        document.getElementById('run-script').addEventListener('click', async () => {
+            const outputDiv = document.getElementById('output');
+            outputDiv.textContent = 'Skript wird ausgeführt...';
+
+            try {
+                const response = await fetch('/run-python');
+                const result = await response.text();
+                outputDiv.textContent = result;
+            } catch (error) {
+                console.error('Fehler beim Ausführen des Skripts:', error);
+                outputDiv.textContent = 'Fehler beim Ausführen des Skripts.';
+            }
+        });
+    </script>
+
+    
 </body>
 </html>
