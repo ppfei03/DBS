@@ -9,6 +9,15 @@ const PORT = 3000;
 // DynamoDB Client konfigurieren
 const dynamoDbClient = new DynamoDBClient({ region: 'us-east-1' });
 
+
+const cors = require('cors');
+app.use(cors({
+    origin: 'https://dbs.philipppfeiffer.de', // Erlaube nur deine Domain
+    methods: ['GET', 'POST', 'PUT', 'DELETE']
+}));
+
+
+
 // Statische Dateien bereitstellen
 app.use(express.static('public'));
 
