@@ -13,7 +13,7 @@ const dynamoDbClient = new DynamoDBClient({ region: 'us-east-1' });
 const cors = require('cors');
 app.use(cors({
     origin: (origin, callback) => {
-        const allowedOrigins = ['https://dbs.philipppfeiffer.de', 'http://34.228.6.222'];
+        const allowedOrigins = ['https://dbs.philipppfeiffer.de', 'https://34.228.6.222'];
         if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
@@ -239,5 +239,5 @@ app.get('/run-python/deleteAllData', (req, res) => {
 
 // Server starten
 app.listen(PORT, () => {
-    console.log(`Server läuft auf http://localhost:${PORT}`);
+    console.log(`Server läuft auf https://localhost:${PORT}`);
 });
