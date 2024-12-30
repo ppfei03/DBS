@@ -1,11 +1,33 @@
 const express = require('express');
-const app = express();
-const port = 3000;
+const { DynamoDBClient, ScanCommand } = require('@aws-sdk/client-dynamodb');
+const path = require('path');
 
-app.get('/', (req, res) => {
-    res.send('Hallo Welt!');
+const app = express();
+const PORT = 3000;
+
+// DynamoDB Client konfigurieren
+const dynamoDbClient = new DynamoDBClient({ region: 'us-east-2' });
+
+// Statische Dateien bereitstellen
+app.use(express.static('public'));
+
+// API-Route, um Daten aus DynamoDB zu holen
+app.get('/api/data', async (req, res) => {
+    const params = {
+        TableName: 'BoxesTable', // Ersetzen Sie dies durch den Namen Ihrer DynamoDB-Tabelle
+    };
+
+    try {
+        const command = new ScanCommand(params);
+        const data = await dynamoDbClient.send(command);
+        res.json(data.Items);
+    } catch (err) {
+        console.error('Fehler beim Abrufen der Daten:', err);
+        res.status(500).send('Fehler beim Abrufen der Daten');
+    }
 });
 
-app.listen(port, () => {
-    console.log(`Server läuft auf http://localhost:${port}`);
+// Server starten
+app.listen(PORT, () => {
+    console.log(`Server läuft auf http://localhost:${PORT}`);
 });

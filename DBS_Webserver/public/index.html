@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daten aus DynamoDB</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            padding: 10px;
+            margin: 5px 0;
+            background: #f4f4f4;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Daten aus DynamoDB</h1>
+    <ul id="data-list">Lade Daten...</ul>
+
+    <script>
+        // Daten von der API abrufen und anzeigen
+        fetch('/api/data')
+            .then(response => response.json())
+            .then(data => {
+                const list = document.getElementById('data-list');
+                list.innerHTML = ''; // Alte Inhalte entfernen
+                data.forEach(item => {
+                    const li = document.createElement('li');
+                    li.textContent = JSON.stringify(item);
+                    list.appendChild(li);
+                });
+            })
+            .catch(err => {
+                console.error('Fehler:', err);
+                const list = document.getElementById('data-list');
+                list.innerHTML = '<li>Fehler beim Laden der Daten.</li>';
+            });
+    </script>
+</body>
+</html>
