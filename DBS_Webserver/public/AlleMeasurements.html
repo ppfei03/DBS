@@ -77,6 +77,7 @@
                 <th>Sensor ID</th>
                 <th>value</th>
                 <th>Box ID</th>
+                <th>Erfasst am</th>
             </tr>
         </thead>
         <tbody id="data-list"></tbody>
@@ -106,12 +107,14 @@
                     const sensorId = item.sensorId?.S || 'N/A';
                     const value = item.value?.S || 'N/A';
                     const boxId = item.boxId?.S || 'N/A';
+                    const createdAt = item.createdAt?.S || 'N/A';
 
                     const row = `
                         <tr>
                             <td>${sensorId}</td>
                             <td>${value}</td>
                             <td>${boxId}</td>
+                            <td>${createdAt}</td>
                         </tr>
                     `;
                     tbody.innerHTML += row;
