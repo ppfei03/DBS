@@ -10,7 +10,14 @@ const PORT = 3000;
 const dynamoDbClient = new DynamoDBClient({ region: 'us-east-1' });
 
 // Statische Dateien bereitstellen
-app.use(express.static('public'));
+//app.use(express.static('public'));
+
+// Middleware zur Protokollierung der eingehenden Verbindungen
+app.use((req, res, next) => {
+    const clientIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    console.log(`Neue Verbindung von: ${clientIp} - ${req.method} ${req.url}`);
+    next();
+});
 
 // API-Route, um Daten aus DynamoDB zu holen
 app.get('/api/data/BoxesTable', async (req, res) => {
