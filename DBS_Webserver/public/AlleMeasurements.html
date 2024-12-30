@@ -64,22 +64,20 @@
 
     <!-- Buttons -->
     <div class="buttons">
-        
         <a href="index.html" class="button">Start</a>
-        <a href="AlleBoxen.html" class="button">->Alle Boxen<-</a>
+        <a href="AlleBoxen.html" class="button">Alle Boxen</a>
         <a href="AlleSensoren.html" class="button">Alle Sensoren</a>
-        <a href="AlleMeasurements.html" class="button">Alle Messungen</a>
-
+        <a href="AlleMeasurements.html" class="button">->Alle Messungen<-</a>
     </div>
 
 
     <table>
         <thead>
             <tr>
-                <th>Box Name</th>
-                <th>Location</th>
+                <th>Sensor ID</th>
+                <th>unit</th>
                 <th>Box ID</th>
-                <th>State</th>
+                <th>type</th>
             </tr>
         </thead>
         <tbody id="data-list"></tbody>
@@ -100,25 +98,23 @@
             loadingIndicator.style.display = 'block'; // Ladeanzeige einblenden
 
             try {
-                const response = await fetch(`/api/data/BoxesTableLasy?lastKey=${encodeURIComponent(lastEvaluatedKey || '')}`);
+                const response = await fetch(`/api/data/MeasurementsTableLasy?lastKey=${encodeURIComponent(lastEvaluatedKey || '')}`);
                 const { items, lastKey } = await response.json();
 
                 // Aktualisieren der Tabelle
                 const tbody = document.getElementById('data-list');
                 items.forEach(item => {
-                    const boxName = item.boxName?.S || 'N/A';
-                    const location = item.location?.L
-                        ? item.location.L.map(coord => coord.N).join(', ')
-                        : 'N/A';
+                    const sensorId = item.sensorId?.S || 'N/A';
+                    const unit = item.unit?.S || 'N/A';
                     const boxId = item.boxId?.S || 'N/A';
-                    const state = item.state?.S || 'N/A';
+                    const type = item.type?.S || 'N/A';
 
                     const row = `
                         <tr>
-                            <td>${boxName}</td>
-                            <td>${location}</td>
+                            <td>${sensorId}</td>
+                            <td>${unit}</td>
                             <td>${boxId}</td>
-                            <td>${state}</td>
+                            <td>${type}</td>
                         </tr>
                     `;
                     tbody.innerHTML += row;
