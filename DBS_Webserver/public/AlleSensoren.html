@@ -12,6 +12,27 @@
         h1 {
             color: #333;
         }
+
+        .buttons {
+            margin: 20px 0;
+        }
+        .button {
+            display: inline-block;
+            margin: 10px;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+        
         table {
             width: 100%;
             border-collapse: collapse;
@@ -29,10 +50,27 @@
         tr:nth-child(even) {
             background-color: #f9f9f9;
         }
+        #loading-indicator {
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            color: #555;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
     <h1>Daten aus DynamoDB</h1>
+
+    <!-- Buttons -->
+    <div class="buttons">
+        
+        <a href="index.html" class="button">Start</a>
+        <a href="AlleBoxen.html" class="button">Alle Boxen</a>
+        <a href="AlleSensoren.html" class="button">->Alle Sensoren<-</a>
+    </div>
+
+
     <table>
         <thead>
             <tr>
@@ -42,21 +80,30 @@
                 <th>State</th>
             </tr>
         </thead>
-        <tbody id="data-list">
-            <tr><td colspan="4">Lade Daten...</td></tr>
-        </tbody>
+        <tbody id="data-list"></tbody>
     </table>
 
-    <script>
-        // Daten von der API abrufen und anzeigen
-        fetch('/api/data/SensorsTable')
-            .then(response => response.json())
-            .then(data => {
-                const tbody = document.getElementById('data-list');
-                tbody.innerHTML = ''; // Alte Inhalte entfernen
+    <!-- Ladeanzeige -->
+    <div id="loading-indicator">Lade Daten...</div>
 
-                data.forEach(item => {
-                    // Extrahieren der Daten aus DynamoDB-Format
+    <script>
+        let lastEvaluatedKey = null; // Startpunkt für Paginierung
+        let isLoading = false;
+
+        async function fetchMoreData() {
+            if (isLoading) return;
+
+            isLoading = true;
+            const loadingIndicator = document.getElementById('loading-indicator');
+            loadingIndicator.style.display = 'block'; // Ladeanzeige einblenden
+
+            try {
+                const response = await fetch(`/api/data/SensorsTableLasy?lastKey=${encodeURIComponent(lastEvaluatedKey || '')}`);
+                const { items, lastKey } = await response.json();
+
+                // Aktualisieren der Tabelle
+                const tbody = document.getElementById('data-list');
+                items.forEach(item => {
                     const boxName = item.boxName?.S || 'N/A';
                     const location = item.location?.L
                         ? item.location.L.map(coord => coord.N).join(', ')
@@ -64,7 +111,6 @@
                     const boxId = item.boxId?.S || 'N/A';
                     const state = item.state?.S || 'N/A';
 
-                    // Neue Zeile zur Tabelle hinzufügen
                     const row = `
                         <tr>
                             <td>${boxName}</td>
@@ -75,12 +121,36 @@
                     `;
                     tbody.innerHTML += row;
                 });
-            })
-            .catch(err => {
-                console.error('Fehler:', err);
-                const tbody = document.getElementById('data-list');
-                tbody.innerHTML = '<tr><td colspan="4">Fehler beim Laden der Daten.</td></tr>';
-            });
+
+                // Setzen des nächsten Startpunkts für die Paginierung
+                lastEvaluatedKey = lastKey;
+
+                // Wenn keine weiteren Daten vorhanden sind, Lazy Loading deaktivieren
+                if (!lastKey) {
+                    window.removeEventListener('scroll', handleScroll);
+                    loadingIndicator.textContent = 'Alle Daten geladen.';
+                }
+            } catch (err) {
+                console.error('Fehler beim Abrufen weiterer Daten:', err);
+                const loadingIndicator = document.getElementById('loading-indicator');
+                loadingIndicator.textContent = 'Fehler beim Laden der Daten.';
+            } finally {
+                isLoading = false;
+                loadingIndicator.style.display = lastEvaluatedKey ? 'block' : 'none'; // Ladeanzeige ausblenden, falls keine weiteren Daten
+            }
+        }
+
+        function handleScroll() {
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
+                fetchMoreData();
+            }
+        }
+
+        // Initialer Datenabruf
+        fetchMoreData();
+
+        // Event-Listener für Scrollen hinzufügen
+        window.addEventListener('scroll', handleScroll);
     </script>
 </body>
 </html>

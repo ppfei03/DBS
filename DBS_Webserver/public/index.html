@@ -12,6 +12,27 @@
         h1 {
             color: #333;
         }
+
+        .buttons {
+            margin: 20px 0;
+        }
+        .button {
+            display: inline-block;
+            margin: 10px;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
@@ -40,6 +61,15 @@
 </head>
 <body>
     <h1>Daten aus DynamoDB</h1>
+
+    <!-- Buttons -->
+    <div class="buttons">
+        <a href="index.html" class="button">->Start<-</a>
+        <a href="AlleBoxen.html" class="button">Alle Boxen</a>
+        <a href="AlleSensoren.html" class="button">Alle Sensoren</a>
+    </div>
+
+
     <table>
         <thead>
             <tr>

@@ -47,7 +47,7 @@ app.get('/api/data/SensorsTableLasy', async (req, res) => {
     const { lastKey } = req.query;
 
     const params = {
-        TableName: 'BoxesTable',
+        TableName: 'SensorsTable',
         Limit: 50, // Anzahl der Datensätze pro Anfrage
     };
 
