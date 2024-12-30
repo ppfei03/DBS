@@ -99,7 +99,7 @@ app.get('/api/data/BoxesTableLasy', async (req, res) => {
 // API-Route zum Ausführen des Python-Skripts
 app.get('/run-python', (req, res) => {
     // Relativer Pfad zum Python-Skript
-    const scriptPath = path.join(__dirname, 'scripts', 'your_script.py');
+    const scriptPath = path.join(__dirname, 'scripts', 'ImportDataToDynamoDB.py');
 
     // Python-Skript ausführen
     exec(`python3 ${scriptPath}`, (error, stdout, stderr) => {
