@@ -23,30 +23,95 @@
             border: 1px solid #ddd;
             border-radius: 5px;
         }
+        .buttons {
+            margin: 20px 0;
+        }
+        .button {
+            display: inline-block;
+            margin: 10px;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
     </style>
 </head>
 <body>
     <h1>Daten aus DynamoDB</h1>
     <ul id="data-list">Lade Daten...</ul>
 
+    <div class="buttons">
+        <a href="AlleBoxen.html" class="button">Alle Boxen</a>
+        <a href="AlleSensoren.html" class="button">Alle Sensoren</a>
+    </div>
+
+    
     <script>
-        // Daten von der API abrufen und anzeigen
-        fetch('/api/data/SensorsTable')
-            .then(response => response.json())
-            .then(data => {
-                const list = document.getElementById('data-list');
-                list.innerHTML = ''; // Alte Inhalte entfernen
-                data.forEach(item => {
-                    const li = document.createElement('li');
-                    li.textContent = JSON.stringify(item);
-                    list.appendChild(li);
+        let lastEvaluatedKey = null; // Startpunkt für Paginierung
+        let isLoading = false;
+
+        async function fetchMoreData() {
+            if (isLoading) return;
+
+            isLoading = true;
+            try {
+                const response = await fetch(`/api/data/SensorsTableLasy?lastKey=${encodeURIComponent(lastEvaluatedKey || '')}`);
+                const { items, lastKey } = await response.json();
+
+                // Aktualisieren der Tabelle
+                const tbody = document.getElementById('data-list');
+                items.forEach(item => {
+                    const boxName = item.boxName?.S || 'N/A';
+                    const location = item.location?.L
+                        ? item.location.L.map(coord => coord.N).join(', ')
+                        : 'N/A';
+                    const boxId = item.boxId?.S || 'N/A';
+                    const state = item.state?.S || 'N/A';
+
+                    const row = `
+                        <tr>
+                            <td>${boxName}</td>
+                            <td>${location}</td>
+                            <td>${boxId}</td>
+                            <td>${state}</td>
+                        </tr>
+                    `;
+                    tbody.innerHTML += row;
                 });
-            })
-            .catch(err => {
-                console.error('Fehler:', err);
-                const list = document.getElementById('data-list');
-                list.innerHTML = '<li>Fehler beim Laden der Daten.</li>';
-            });
+
+                // Setzen des nächsten Startpunkts für die Paginierung
+                lastEvaluatedKey = lastKey;
+
+                // Wenn keine weiteren Daten vorhanden sind, deaktivieren Sie Lazy Loading
+                if (!lastKey) {
+                    window.removeEventListener('scroll', handleScroll);
+                }
+            } catch (err) {
+                console.error('Fehler beim Abrufen weiterer Daten:', err);
+            } finally {
+                isLoading = false;
+            }
+        }
+
+        function handleScroll() {
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
+                fetchMoreData();
+            }
+        }
+
+        // Initialer Datenabruf
+        fetchMoreData();
+
+        // Event-Listener für Scrollen hinzufügen
+        window.addEventListener('scroll', handleScroll);
     </script>
 </body>
 </html>

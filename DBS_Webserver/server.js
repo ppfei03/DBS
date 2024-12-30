@@ -42,6 +42,33 @@ app.get('/api/data/SensorsTable', async (req, res) => {
     }
 });
 
+// API-Route, um Daten aus DynamoDB zu holen
+app.get('/api/data/SensorsTableLasy', async (req, res) => {
+    const { lastKey } = req.query;
+
+    const params = {
+        TableName: 'BoxesTable',
+        Limit: 50, // Anzahl der Datensätze pro Anfrage
+    };
+
+    if (lastKey) {
+        params.ExclusiveStartKey = JSON.parse(decodeURIComponent(lastKey));
+    }
+
+    try {
+        const command = new ScanCommand(params);
+        const data = await dynamoDbClient.send(command);
+
+        res.json({
+            items: data.Items,
+            lastKey: data.LastEvaluatedKey ? encodeURIComponent(JSON.stringify(data.LastEvaluatedKey)) : null,
+        });
+    } catch (err) {
+        console.error('Fehler beim Abrufen der Daten:', err);
+        res.status(500).send('Fehler beim Abrufen der Daten');
+    }
+});
+
 // Server starten
 app.listen(PORT, () => {
     console.log(`Server läuft auf http://localhost:${PORT}`);
