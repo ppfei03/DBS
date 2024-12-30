@@ -10,7 +10,7 @@ const PORT = 3000;
 const dynamoDbClient = new DynamoDBClient({ region: 'us-east-1' });
 
 // Statische Dateien bereitstellen
-//app.use(express.static('public'));
+app.use(express.static('public'));
 
 // Middleware zur Protokollierung der eingehenden Verbindungen
 app.use((req, res, next) => {
