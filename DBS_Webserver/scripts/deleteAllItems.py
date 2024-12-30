@@ -6,14 +6,26 @@ dynamodb = boto3.resource('dynamodb', region_name='us-east-2')  # Region anpasse
 # Funktion zum Löschen aller Einträge in einer Tabelle
 def delete_all_items(table_name):
     table = dynamodb.Table(table_name)
-    print(f"Alle Einträge in der Tabelle '{table_name}' werden gelöscht...")
+    print(f"Lösche alle Einträge in der Tabelle '{table_name}'...")
 
-    # Daten in Blöcken scannen und löschen
-    scan = table.scan()
-    with table.batch_writer() as batch:
-        for item in scan['Items']:
-            batch.delete_item(Key={key: item[key] for key in table.key_schema[0].keys()})
-    
+    # Schlüssel (Primary Key) aus der Tabelle extrahieren
+    keys = [key['AttributeName'] for key in table.key_schema]
+
+    # Paginierung verwenden, um alle Daten abzurufen
+    scan_kwargs = {}
+    done = False
+    while not done:
+        scan = table.scan(**scan_kwargs)
+        with table.batch_writer() as batch:
+            for item in scan['Items']:
+                # Nur die Schlüssel des Items verwenden
+                key = {k: item[k] for k in keys}
+                batch.delete_item(Key=key)
+
+        # Falls LastEvaluatedKey existiert, gibt es weitere Seiten
+        scan_kwargs['ExclusiveStartKey'] = scan.get('LastEvaluatedKey', None)
+        done = 'LastEvaluatedKey' not in scan
+
     print(f"Alle Einträge in der Tabelle '{table_name}' wurden gelöscht.")
 
 # Tabellen definieren
