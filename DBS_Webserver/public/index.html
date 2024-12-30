@@ -71,6 +71,7 @@
     <h1>Willkommen auf dieser Seite...</h1>
 
     <button id="run-script-button-insert">Python-Skript Insert</button>
+    <button id="run-script-button-insertDataMeasure">Python-Skript Insert Messungen</button>
     <button id="run-script-button-delete">Python-Skript Delete</button>
     <div id="script-output"></div>
     
@@ -94,6 +95,20 @@
     
             try {
                 const response = await fetch('/run-python/deleteAllData');
+                const result = await response.text();
+                outputDiv.textContent = `Ergebnis: ${result}`;
+            } catch (error) {
+                console.error('Fehler beim Ausführen des Python-Skripts:', error);
+                outputDiv.textContent = 'Fehler beim Ausführen des Python-Skripts.';
+            }
+        });
+
+        document.getElementById('run-script-button-insertDataMeasure').addEventListener('click', async () => {
+            const outputDiv = document.getElementById('script-output');
+            outputDiv.textContent = 'Python-Skript wird ausgeführt...';
+    
+            try {
+                const response = await fetch('/run-python/insertDataMeasure');
                 const result = await response.text();
                 outputDiv.textContent = `Ergebnis: ${result}`;
             } catch (error) {
