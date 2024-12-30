@@ -49,7 +49,7 @@
 
     <script>
         // Daten von der API abrufen und anzeigen
-        fetch('/api/data')
+        fetch('/api/data/SensorsTable')
             .then(response => response.json())
             .then(data => {
                 const tbody = document.getElementById('data-list');

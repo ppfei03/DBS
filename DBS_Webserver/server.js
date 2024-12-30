@@ -12,9 +12,24 @@ const dynamoDbClient = new DynamoDBClient({ region: 'us-east-2' });
 app.use(express.static('public'));
 
 // API-Route, um Daten aus DynamoDB zu holen
-app.get('/api/data', async (req, res) => {
+app.get('/api/data/BoxesTable', async (req, res) => {
     const params = {
         TableName: 'BoxesTable', // Ersetzen Sie dies durch den Namen Ihrer DynamoDB-Tabelle
+    };
+
+    try {
+        const command = new ScanCommand(params);
+        const data = await dynamoDbClient.send(command);
+        res.json(data.Items);
+    } catch (err) {
+        console.error('Fehler beim Abrufen der Daten:', err);
+        res.status(500).send('Fehler beim Abrufen der Daten');
+    }
+});
+// API-Route, um Daten aus DynamoDB zu holen
+app.get('/api/data/SensorsTable', async (req, res) => {
+    const params = {
+        TableName: 'SensorsTable', // Ersetzen Sie dies durch den Namen Ihrer DynamoDB-Tabelle
     };
 
     try {
