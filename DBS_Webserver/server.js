@@ -9,7 +9,7 @@ const PORT = 3000;
 // DynamoDB Client konfigurieren
 const dynamoDbClient = new DynamoDBClient({ region: 'us-east-1' });
 
-/** 
+
 const cors = require('cors');
 app.use(cors({
     origin: (origin, callback) => {
@@ -22,7 +22,7 @@ app.use(cors({
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE']
 }));
-*/
+
 
 
 // Statische Dateien bereitstellen
