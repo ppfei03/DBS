@@ -106,7 +106,7 @@ app.get('/run-python/deleteAllData', (req, res) => runPythonScript('insertTables
 
 
 // API-Route für die Abfrage
-app.get('/api/sensors', async (req, res) => {
+app.get('/api/data/sensors', async (req, res) => {
     const { unit } = req.query;
 
     if (!unit) {
@@ -136,6 +136,72 @@ app.get('/api/sensors', async (req, res) => {
         });
     } catch (err) {
         console.error('Fehler bei der Abfrage:', err);
+        res.status(500).json({ error: 'Fehler beim Abrufen der Daten.', details: err.message });
+    }
+});
+
+
+// API: Sensoren mit einer bestimmten Einheit und ihre Messwerte abrufen
+app.get('/api/data/sensor-measurements', async (req, res) => {
+    const { unit } = req.query;
+
+    if (!unit) {
+        return res.status(400).json({ error: 'Einheit (unit) muss angegeben werden.' });
+    }
+
+    try {
+        // 1. Sensoren mit der gewünschten Einheit abrufen
+        const sensorsParams = {
+            TableName: 'SensorsTable',
+            IndexName: 'UnitIndex', // GSI für 'unit'
+            KeyConditionExpression: '#unit = :unitValue',
+            ExpressionAttributeNames: {
+                '#unit': 'unit',
+            },
+            ExpressionAttributeValues: {
+                ':unitValue': { S: unit },
+            },
+        };
+        const sensorsCommand = new QueryCommand(sensorsParams);
+        const sensorsResponse = await dynamoDbClient.send(sensorsCommand);
+        const sensors = sensorsResponse.Items || [];
+
+        if (sensors.length === 0) {
+            return res.json({ message: 'Keine Sensoren mit der angegebenen Einheit gefunden.', measurements: [] });
+        }
+
+        // 2. Messwerte für jeden Sensor abrufen
+        const measurements = [];
+        for (const sensor of sensors) {
+            const sensorId = sensor.sensorId.S;
+
+            // Messwerte für den aktuellen Sensor abrufen
+            const measurementsParams = {
+                TableName: 'MeasurementsTable',
+                FilterExpression: '#sensorId = :sensorIdValue',
+                ExpressionAttributeNames: {
+                    '#sensorId': 'sensorId',
+                },
+                ExpressionAttributeValues: {
+                    ':sensorIdValue': { S: sensorId },
+                },
+            };
+            const measurementsCommand = new ScanCommand(measurementsParams);
+            const measurementsResponse = await dynamoDbClient.send(measurementsCommand);
+
+            // Messwerte hinzufügen
+            measurements.push(...measurementsResponse.Items.map(item => ({
+                sensorId: item.sensorId.S,
+                value: item.value.S,
+                createdAt: item.createdAt.S,
+                boxId: item.boxId.S,
+            })));
+        }
+
+        // Ergebnisse zurückgeben
+        res.json({ sensors: sensors.length, measurements });
+    } catch (err) {
+        console.error('Fehler beim Abrufen der Daten:', err);
         res.status(500).json({ error: 'Fehler beim Abrufen der Daten.', details: err.message });
     }
 });
