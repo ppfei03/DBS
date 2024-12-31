@@ -1,5 +1,5 @@
 const express = require('express');
-const { DynamoDBClient, ScanCommand } = require('@aws-sdk/client-dynamodb');
+const { DynamoDBClient, ScanCommand, QueryCommand  } = require('@aws-sdk/client-dynamodb');
 const path = require('path');
 const { exec } = require('child_process');
 const cors = require('cors');
