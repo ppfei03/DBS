@@ -116,7 +116,7 @@ app.get('/api/data/sensorsMitPhaenomen', async (req, res) => {
             '#unit': 'unit', // Platzhalter für reserviertes Schlüsselwort
         },
         ExpressionAttributeValues: {
-            ':unitValue': { S: Phaenomen }, // Suchwert
+            ':unitValue': { S: '°C' }, // Suchwert
         },
     };
 
