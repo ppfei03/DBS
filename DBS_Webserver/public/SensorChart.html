@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verlaufskurve - °C</title>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+        }
+        canvas {
+            margin-top: 20px;
+            max-width: 100%;
+            height: auto;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+
+        .buttons {
+            margin: 20px 0;
+        }
+        .button {
+            display: inline-block;
+            margin: 10px;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        #loading-indicator {
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            color: #555;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Daten aus DynamoDB</h1>
+    <h2>Temperatur Verlaufskurve (°C)</h2>
+    <!-- Buttons -->
+    <div class="buttons">
+        
+        <a href="index" class="button">Start</a>
+        <a href="AlleBoxen" class="button">->Boxen<-</a>
+        <a href="AlleSensoren" class="button">Sensoren</a>
+        <a href="AlleMeasurements" class="button">Messungen</a>
+        <a href="BoxenMap" class="button">Karte</a>
+        <a href="SensorChart" class="button">Sensor Graph</a>
+
+
+    </div>
+    <canvas id="temperatureChart"></canvas>
+
+    <script>
+        async function fetchTemperatureData() {
+            try {
+                const response = await fetch('https://api.philipppfeiffer.de/api/sensor-measurements?unit=°C');
+                const data = await response.json();
+
+                if (data.measurements && data.measurements.length > 0) {
+                    const measurements = data.measurements;
+
+                    // Sortiere Messungen nach Zeit
+                    measurements.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+
+                    // Extrahiere die Zeitstempel und Werte
+                    const labels = measurements.map(measurement => new Date(measurement.createdAt).toLocaleString());
+                    const values = measurements.map(measurement => parseFloat(measurement.value));
+
+                    // Diagramm erstellen
+                    createChart(labels, values);
+                } else {
+                    console.error('Keine Messwerte gefunden.');
+                    document.body.innerHTML += '<p>Keine Messwerte verfügbar.</p>';
+                }
+            } catch (err) {
+                console.error('Fehler beim Abrufen der API:', err);
+                document.body.innerHTML += '<p>Fehler beim Abrufen der Daten.</p>';
+            }
+        }
+
+        function createChart(labels, data) {
+            const ctx = document.getElementById('temperatureChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Temperatur (°C)',
+                        data: data,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderWidth: 2,
+                        pointRadius: 3,
+                        pointBackgroundColor: 'rgba(75, 192, 192, 1)',
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Zeitpunkt'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Temperatur (°C)'
+                            },
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Daten abrufen und Diagramm erstellen
+        fetchTemperatureData();
+    </script>
+</body>
+</html>
