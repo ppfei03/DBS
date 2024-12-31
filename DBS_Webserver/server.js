@@ -37,12 +37,12 @@ app.use((req, res, next) => {
 
 // Standardroute für den Zugriff auf index
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index'));
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // Dynamisches Routing für HTML-Dateien
 app.get('/:file', (req, res, next) => {
-    const fileName = `${req.params.file}`; // Anhängen von `` an den Dateinamen
+    const fileName = `${req.params.file}.html`; // Anhängen von `` an den Dateinamen
     const filePath = path.join(__dirname, 'public', fileName);
     res.sendFile(filePath, (err) => {
         if (err) {
