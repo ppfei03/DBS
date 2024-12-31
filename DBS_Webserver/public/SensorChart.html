@@ -95,8 +95,8 @@
             const q1 = sorted[Math.floor((sorted.length / 4))];
             const q3 = sorted[Math.ceil((sorted.length * (3 / 4))) - 1];
             const iqr = q3 - q1;
-            const lowerBound = q1 - 1 * iqr;
-            const upperBound = q3 + 1 * iqr;
+            const lowerBound = q1 - 1.5 * iqr;
+            const upperBound = q3 + 1.5 * iqr;
             return { lowerBound, upperBound };
         }
 
@@ -117,7 +117,7 @@
                 if (data.measurements && data.measurements.length > 0) {
                     let measurements = data.measurements;
                     measurements.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-                    measurements = measurements//removeOutliers(measurements);
+                    measurements = removeOutliers(measurements);
                     const labels = measurements.map(measurement => new Date(measurement.createdAt).toLocaleString());
                     const values = measurements.map(measurement => parseFloat(measurement.value));
                     createChart(labels, values);
