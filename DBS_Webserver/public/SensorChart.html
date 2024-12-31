@@ -6,6 +6,8 @@
     <title>Verlaufskurve - °C</title>
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chart.js Zoom Plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -20,14 +22,6 @@
             max-width: 100%;
             height: auto;
         }
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        h1 {
-            color: #333;
-        }
-
         .buttons {
             margin: 20px 0;
         }
@@ -47,47 +41,18 @@
         .button:hover {
             background-color: #0056b3;
         }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 10px;
-            text-align: left;
-        }
-        th {
-            background-color: #f4f4f4;
-            color: #333;
-        }
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-        #loading-indicator {
-            text-align: center;
-            font-size: 16px;
-            font-weight: bold;
-            color: #555;
-            margin-top: 20px;
-        }
     </style>
 </head>
 <body>
-    <h1>Daten aus DynamoDB</h1>
-    <h2>Temperatur Verlaufskurve (°C)</h2>
+    <h1>Temperatur Verlaufskurve (°C)</h1>
     <!-- Buttons -->
     <div class="buttons">
-        
         <a href="index" class="button">Start</a>
-        <a href="AlleBoxen" class="button">->Boxen<-</a>
+        <a href="AlleBoxen" class="button">Boxen</a>
         <a href="AlleSensoren" class="button">Sensoren</a>
         <a href="AlleMeasurements" class="button">Messungen</a>
         <a href="BoxenMap" class="button">Karte</a>
-        <a href="SensorChart" class="button">Sensor Graph</a>
-
-
+        <a href="SensorChart" class="button">->Sensor Graph<-</a>
     </div>
     <canvas id="temperatureChart"></canvas>
 
@@ -132,11 +97,41 @@
                         backgroundColor: 'rgba(75, 192, 192, 0.2)',
                         borderWidth: 2,
                         pointRadius: 3,
+                        pointHoverRadius: 6, // Größere Punkte beim Hover
                         pointBackgroundColor: 'rgba(75, 192, 192, 1)',
                     }]
                 },
                 options: {
                     responsive: true,
+                    interaction: {
+                        mode: 'nearest',
+                        intersect: false,
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.raw.toFixed(2); // Zwei Nachkommastellen
+                                    return `Wert: ${value} °C`;
+                                }
+                            }
+                        },
+                        zoom: {
+                            zoom: {
+                                wheel: {
+                                    enabled: true // Aktiviert Zoomen mit dem Mausrad
+                                },
+                                pinch: {
+                                    enabled: true // Aktiviert Zoomen per Touch
+                                },
+                                mode: 'x', // Nur horizontal zoomen
+                            },
+                            pan: {
+                                enabled: true, // Aktiviert Schwenken
+                                mode: 'x', // Nur horizontal schwenken
+                            }
+                        }
+                    },
                     scales: {
                         x: {
                             title: {
