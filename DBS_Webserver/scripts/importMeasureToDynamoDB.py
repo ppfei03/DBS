@@ -75,7 +75,7 @@ def main():
         sensor_id = sensor['sensorId']
 
         # Neustes Datum aus der MeasurementsTable abrufen
-        latest_date = get_latest_measurement_date(box_id, sensor_id)
+        latest_date = get_latest_measurement_date(box_id)
 
         if latest_date:
             from_date = latest_date
