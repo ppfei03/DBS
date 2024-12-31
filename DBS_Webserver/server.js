@@ -82,14 +82,10 @@ const dynamoDbScan = async (tableName, res, limit = null, lastKey = null) => {
 };
 
 // DynamoDB-API-Routen
+
 app.get('/api/data/:tableName', async (req, res) => {
     const { tableName } = req.params;
-    await dynamoDbScan(tableName, res);
-});
-
-app.get('/api/data/:tableNameLasy', async (req, res) => {
-    const { tableName } = req.params;
-    tableName = tableName.replace("Lasy", "");
+    //tableName = tableName.replace("Lasy", "");
     const { lastKey } = req.query;
     await dynamoDbScan(tableName, res, 50, lastKey);
 });
