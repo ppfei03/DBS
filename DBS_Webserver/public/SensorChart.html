@@ -40,9 +40,33 @@
         .button:hover {
             background-color: #0056b3;
         }
+
+        /* Ladebalken */
+        #loading-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, rgba(0,123,255,1) 25%, rgba(0,123,255,0.3) 50%, rgba(0,123,255,1) 75%);
+            background-size: 200% 100%;
+            animation: loading-animation 1.5s infinite;
+            display: none;
+            z-index: 1000;
+        }
+
+        @keyframes loading-animation {
+            from {
+                background-position: 0% 0%;
+            }
+            to {
+                background-position: -200% 0%;
+            }
+        }
     </style>
 </head>
 <body>
+    <div id="loading-bar"></div>
     <h1>Temperatur Verlaufskurve (°C)</h1>
     <!-- Buttons -->
     <div class="buttons">
@@ -56,63 +80,58 @@
     <canvas id="temperatureChart"></canvas>
 
     <script>
-        function calculateIQR(values) {
-    // Sortiere Werte
-    const sorted = [...values].sort((a, b) => a - b);
-
-    // Quartile berechnen
-    const q1 = sorted[Math.floor((sorted.length / 4))];
-    const q3 = sorted[Math.ceil((sorted.length * (3 / 4))) - 1];
-    const iqr = q3 - q1;
-
-    // Wertebereich für Ausreißerbereinigung
-    const lowerBound = q1 - 1 * iqr;
-    const upperBound = q3 + 1 * iqr;
-
-    return { lowerBound, upperBound };
-}
-
-function removeOutliers(data) {
-    const values = data.map(d => parseFloat(d.value));
-    const { lowerBound, upperBound } = calculateIQR(values);
-
-    // Werte innerhalb des Bereichs behalten
-    return data.filter(d => {
-        const value = parseFloat(d.value);
-        return value >= lowerBound && value <= upperBound;
-    });
-}
-
-async function fetchTemperatureData() {
-    try {
-        const response = await fetch('https://api.philipppfeiffer.de/api/sensor-measurements?unit=°C');
-        const data = await response.json();
-
-        if (data.measurements && data.measurements.length > 0) {
-            let measurements = data.measurements;
-
-            // Sortiere Messungen nach Zeit
-            measurements.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-
-            // Bereinigung der Daten (Entfernen von Ausreißern)
-            measurements = removeOutliers(measurements);
-
-            // Extrahiere die Zeitstempel und Werte
-            const labels = measurements.map(measurement => new Date(measurement.createdAt).toLocaleString());
-            const values = measurements.map(measurement => parseFloat(measurement.value));
-
-            // Diagramm erstellen
-            createChart(labels, values);
-        } else {
-            console.error('Keine Messwerte gefunden.');
-            document.body.innerHTML += '<p>Keine Messwerte verfügbar.</p>';
+        // Ladebalken einblenden
+        function showLoadingBar() {
+            document.getElementById('loading-bar').style.display = 'block';
         }
-    } catch (err) {
-        console.error('Fehler beim Abrufen der API:', err);
-        document.body.innerHTML += '<p>Fehler beim Abrufen der Daten.</p>';
-    }
-}
 
+        // Ladebalken ausblenden
+        function hideLoadingBar() {
+            document.getElementById('loading-bar').style.display = 'none';
+        }
+
+        function calculateIQR(values) {
+            const sorted = [...values].sort((a, b) => a - b);
+            const q1 = sorted[Math.floor((sorted.length / 4))];
+            const q3 = sorted[Math.ceil((sorted.length * (3 / 4))) - 1];
+            const iqr = q3 - q1;
+            const lowerBound = q1 - 1 * iqr;
+            const upperBound = q3 + 1 * iqr;
+            return { lowerBound, upperBound };
+        }
+
+        function removeOutliers(data) {
+            const values = data.map(d => parseFloat(d.value));
+            const { lowerBound, upperBound } = calculateIQR(values);
+            return data.filter(d => {
+                const value = parseFloat(d.value);
+                return value >= lowerBound && value <= upperBound;
+            });
+        }
+
+        async function fetchTemperatureData() {
+            showLoadingBar(); // Ladebalken einblenden
+            try {
+                const response = await fetch('https://api.philipppfeiffer.de/api/sensor-measurements?unit=°C');
+                const data = await response.json();
+                if (data.measurements && data.measurements.length > 0) {
+                    let measurements = data.measurements;
+                    measurements.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+                    measurements = removeOutliers(measurements);
+                    const labels = measurements.map(measurement => new Date(measurement.createdAt).toLocaleString());
+                    const values = measurements.map(measurement => parseFloat(measurement.value));
+                    createChart(labels, values);
+                } else {
+                    console.error('Keine Messwerte gefunden.');
+                    document.body.innerHTML += '<p>Keine Messwerte verfügbar.</p>';
+                }
+            } catch (err) {
+                console.error('Fehler beim Abrufen der API:', err);
+                document.body.innerHTML += '<p>Fehler beim Abrufen der Daten.</p>';
+            } finally {
+                hideLoadingBar(); // Ladebalken ausblenden
+            }
+        }
 
         function createChart(labels, data) {
             const ctx = document.getElementById('temperatureChart').getContext('2d');
@@ -127,7 +146,7 @@ async function fetchTemperatureData() {
                         backgroundColor: 'rgba(75, 192, 192, 0.2)',
                         borderWidth: 2,
                         pointRadius: 3,
-                        pointHoverRadius: 6, // Größere Punkte beim Hover
+                        pointHoverRadius: 6,
                         pointBackgroundColor: 'rgba(75, 192, 192, 1)',
                     }]
                 },
@@ -141,39 +160,29 @@ async function fetchTemperatureData() {
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
-                                    const value = context.raw.toFixed(2); // Zwei Nachkommastellen
+                                    const value = context.raw.toFixed(2);
                                     return `Wert: ${value} °C`;
                                 }
                             }
                         },
                         zoom: {
                             zoom: {
-                                wheel: {
-                                    enabled: true // Aktiviert Zoomen mit dem Mausrad
-                                },
-                                pinch: {
-                                    enabled: true // Aktiviert Zoomen per Touch
-                                },
-                                mode: 'x', // Nur horizontal zoomen
+                                wheel: { enabled: true },
+                                pinch: { enabled: true },
+                                mode: 'x',
                             },
                             pan: {
-                                enabled: true, // Aktiviert Schwenken
-                                mode: 'x', // Nur horizontal schwenken
+                                enabled: true,
+                                mode: 'x',
                             }
                         }
                     },
                     scales: {
                         x: {
-                            title: {
-                                display: true,
-                                text: 'Zeitpunkt'
-                            }
+                            title: { display: true, text: 'Zeitpunkt' }
                         },
                         y: {
-                            title: {
-                                display: true,
-                                text: 'Temperatur (°C)'
-                            },
+                            title: { display: true, text: 'Temperatur (°C)' },
                             beginAtZero: true
                         }
                     }
@@ -181,8 +190,7 @@ async function fetchTemperatureData() {
             });
         }
 
-        // Daten abrufen und Diagramm erstellen
-        fetchTemperatureData();
+        fetchTemperatureData(); // Daten abrufen und Diagramm erstellen
     </script>
 </body>
 </html>
