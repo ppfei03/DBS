@@ -70,9 +70,7 @@
         <a href="AlleSensoren.html" class="button">Sensoren</a>
         <a href="AlleMeasurements.html" class="button">->Messungen<-</a>
         <a href="BoxenMap.html" class="button">Karte</a>
-
     </div>
-
 
     <table>
         <thead>
@@ -106,22 +104,30 @@
 
                 // Aktualisieren der Tabelle
                 const tbody = document.getElementById('data-list');
-                items.forEach(item => {
-                    const sensorId = item.sensorId?.S || 'N/A';
-                    const value = item.value?.S || 'N/A';
-                    const boxId = item.boxId?.S || 'N/A';
-                    const createdAt = item.createdAt?.S || 'N/A';
-
-                    const row = `
+                if (items.length === 0 && !lastEvaluatedKey) {
+                    // Keine Daten, aber Datenbank ist erreichbar
+                    tbody.innerHTML = `
                         <tr>
-                            <td>${sensorId}</td>
-                            <td>${value}</td>
-                            <td>${boxId}</td>
-                            <td>${createdAt}</td>
-                        </tr>
-                    `;
-                    tbody.innerHTML += row;
-                });
+                            <td colspan="4" style="text-align: center;">Keine Daten verfügbar, aber die Datenbank ist erreichbar.</td>
+                        </tr>`;
+                } else {
+                    items.forEach(item => {
+                        const sensorId = item.sensorId?.S || 'N/A';
+                        const value = item.value?.S || 'N/A';
+                        const boxId = item.boxId?.S || 'N/A';
+                        const createdAt = item.createdAt?.S || 'N/A';
+
+                        const row = `
+                            <tr>
+                                <td>${sensorId}</td>
+                                <td>${value}</td>
+                                <td>${boxId}</td>
+                                <td>${createdAt}</td>
+                            </tr>
+                        `;
+                        tbody.innerHTML += row;
+                    });
+                }
 
                 // Setzen des nächsten Startpunkts für die Paginierung
                 lastEvaluatedKey = lastKey;
