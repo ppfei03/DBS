@@ -24,7 +24,6 @@ app.use(cors({
 }));
 
 
-//app.use(cors())
 
 // Statische Dateien bereitstellen
 app.use(express.static('public'));
@@ -42,8 +41,9 @@ app.get('/', (req, res) => {
 });
 
 // Dynamisches Routing für HTML-Dateien
-app.get('/:file', (req, res) => {
-    const filePath = path.join(__dirname, 'public', req.params.file);
+app.get('/:file', (req, res, next) => {
+    const fileName = `${req.params.file}.html`; // Anhängen von `.html` an den Dateinamen
+    const filePath = path.join(__dirname, 'public', fileName);
     res.sendFile(filePath, (err) => {
         if (err) {
             console.error(`Fehler beim Laden der Datei: ${filePath}`);
