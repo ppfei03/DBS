@@ -11,11 +11,18 @@ const PORT = 3000;
 const dynamoDbClient = new DynamoDBClient({ region: 'us-east-1' });
 
 // CORS konfigurieren
+const allowedOrigins = ['https://dbs.philipppfeiffer.de','https://api.philipppfeiffer.de', 'http://77.20.250.44']
+
 app.use(cors({
-    origin: ['https://dbs.philipppfeiffer.de','https://api.philipppfeiffer.de'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: true,
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Zugriff nicht erlaubt.'));
+        }
+    },
 }));
+
 
 //app.use(cors())
 
