@@ -12,15 +12,8 @@ const dynamoDbClient = new DynamoDBClient({ region: 'us-east-1' });
 
 const cors = require('cors');
 app.use(cors({
-    origin: (origin, callback) => {
-        const allowedOrigins = ['https://dbs.philipppfeiffer.de', 'https://34.228.6.222'];
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
-        } else {
-            callback(new Error('Nicht erlaubte Herkunft'));
-        }
-    },
-    methods: ['GET', 'POST', 'PUT', 'DELETE']
+    origin: 'https://philipppfeiffer.de', // Hauptdomain bei Netlify
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
 }));
 
 
