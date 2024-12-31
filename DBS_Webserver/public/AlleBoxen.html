@@ -83,6 +83,7 @@
                 <th>Location</th>
                 <th>Box ID</th>
                 <th>State</th>
+                <th>Standort</th>
             </tr>
         </thead>
         <tbody id="data-list"></tbody>
@@ -115,6 +116,7 @@
                         : 'N/A';
                     const boxId = item.boxId?.S || 'N/A';
                     const state = item.state?.S || 'N/A';
+                    const exposure = item.exposure?.S || 'N/A';
 
                     const row = `
                         <tr>
@@ -122,6 +124,7 @@
                             <td>${location}</td>
                             <td>${boxId}</td>
                             <td>${state}</td>
+                            <td>${exposure}</td>
                         </tr>
                     `;
                     tbody.innerHTML += row;

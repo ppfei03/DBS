@@ -30,6 +30,7 @@ if response.status_code == 200:
                 box_item = {
                     "boxId": box["_id"],
                     "boxName": box.get("name", "Unbekannt"),
+                    "exposure":box["exposure"],
                     "location": [
                         Decimal(str(box["currentLocation"]["coordinates"][1])),
                         Decimal(str(box["currentLocation"]["coordinates"][0]))
