@@ -91,61 +91,73 @@
         let lastEvaluatedKey = null; // Startpunkt für Paginierung
         let isLoading = false;
 
-        async function fetchMoreData() {
-            if (isLoading) return;
+async function fetchMoreData() {
+    if (isLoading) return;
 
-            isLoading = true;
-            const loadingIndicator = document.getElementById('loading-indicator');
-            loadingIndicator.style.display = 'block'; // Ladeanzeige einblenden
+    isLoading = true;
+    const loadingIndicator = document.getElementById('loading-indicator');
+    loadingIndicator.style.display = 'block'; // Ladeanzeige einblenden
 
-            try {
-                const response = await fetch(`https://api.philipppfeiffer.de/api/data/MeasurementsTablee?lastKey=${encodeURIComponent(lastEvaluatedKey || '')}`);
-                const { items, lastKey } = await response.json();
-
-                // Aktualisieren der Tabelle
-                const tbody = document.getElementById('data-list');
-                if (items.length === 0 && !lastEvaluatedKey) {
-                    // Keine Daten, aber Datenbank ist erreichbar
-                    tbody.innerHTML = `
-                        <tr>
-                            <td colspan="4" style="text-align: center;">Keine Daten verfügbar, aber die Datenbank ist erreichbar.</td>
-                        </tr>`;
-                } else {
-                    items.forEach(item => {
-                        const sensorId = item.sensorId?.S || 'N/A';
-                        const value = item.value?.S || 'N/A';
-                        const boxId = item.boxId?.S || 'N/A';
-                        const createdAt = item.createdAt?.S || 'N/A';
-
-                        const row = `
-                            <tr>
-                                <td>${sensorId}</td>
-                                <td>${value}</td>
-                                <td>${boxId}</td>
-                                <td>${createdAt}</td>
-                            </tr>
-                        `;
-                        tbody.innerHTML += row;
-                    });
-                }
-
-                // Setzen des nächsten Startpunkts für die Paginierung
-                lastEvaluatedKey = lastKey;
-
-                // Wenn keine weiteren Daten vorhanden sind, Lazy Loading deaktivieren
-                if (!lastKey) {
-                    window.removeEventListener('scroll', handleScroll);
-                    loadingIndicator.textContent = 'Alle Daten geladen.';
-                }
-            } catch (err) {
-                console.error('Fehler beim Abrufen weiterer Daten:', err);
-                const loadingIndicator = document.getElementById('loading-indicator');
-                loadingIndicator.textContent = 'Fehler beim Laden der Daten.';
-            } finally {
-                isLoading = false;
-                loadingIndicator.style.display = lastEvaluatedKey ? 'block' : 'none'; // Ladeanzeige ausblenden, falls keine weiteren Daten
-            }
+    try {
+        const response = await fetch(`https://api.philipppfeiffer.de/api/data/MeasurementsTable?lastKey=${encodeURIComponent(lastEvaluatedKey || '')}`);
+        
+        if (!response.ok) {
+            // Fehlerhafte Antwort vom Server
+            throw new Error(`Server antwortete mit Status: ${response.status} ${response.statusText}`);
         }
+
+        const { items, lastKey } = await response.json();
+
+        // Aktualisieren der Tabelle
+        const tbody = document.getElementById('data-list');
+        if (items.length === 0 && !lastEvaluatedKey) {
+            // Keine Daten, aber Datenbank ist erreichbar
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="4" style="text-align: center;">Keine Daten verfügbar, aber die Datenbank ist erreichbar.</td>
+                </tr>`;
+        } else {
+            items.forEach(item => {
+                const sensorId = item.sensorId?.S || 'N/A';
+                const value = item.value?.S || 'N/A';
+                const boxId = item.boxId?.S || 'N/A';
+                const createdAt = item.createdAt?.S || 'N/A';
+
+                const row = `
+                    <tr>
+                        <td>${sensorId}</td>
+                        <td>${value}</td>
+                        <td>${boxId}</td>
+                        <td>${createdAt}</td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        // Setzen des nächsten Startpunkts für die Paginierung
+        lastEvaluatedKey = lastKey;
+
+        // Wenn keine weiteren Daten vorhanden sind, Lazy Loading deaktivieren
+        if (!lastKey) {
+            window.removeEventListener('scroll', handleScroll);
+            loadingIndicator.textContent = 'Alle Daten geladen.';
+        }
+    } catch (err) {
+        console.error('Fehler beim Abrufen weiterer Daten:', err);
+
+        const tbody = document.getElementById('data-list');
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="4" style="text-align: center; color: red;">Fehler: ${err.message}</td>
+            </tr>`;
+        loadingIndicator.textContent = 'Fehler beim Laden der Daten.';
+    } finally {
+        isLoading = false;
+        loadingIndicator.style.display = lastEvaluatedKey ? 'block' : 'none'; // Ladeanzeige ausblenden, falls keine weiteren Daten
+    }
+}
+
 
         function handleScroll() {
             if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
