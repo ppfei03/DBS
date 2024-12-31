@@ -24,7 +24,7 @@ if response.status_code == 200:
     print(f"{len(boxes)} Boxen abgerufen.")
 
     for box in boxes:
-        if box.get("state") == "active" & box.get("exposure") == "outdoor":  # Nur aktive Boxen verarbeiten
+        if box.get("state") == "active" and box.get("exposure") == "outdoor":  # Nur aktive Boxen verarbeiten
             try:
                 # Box-Daten speichern
                 box_item = {
