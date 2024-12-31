@@ -99,7 +99,7 @@ async function fetchMoreData() {
     loadingIndicator.style.display = 'block'; // Ladeanzeige einblenden
 
     try {
-        const response = await fetch(`https://api.philipppfeiffer.de/api/data/MeasurementsTable?lastKey=${encodeURIComponent(lastEvaluatedKey || '')}`);
+        const response = await fetch(`https://api.philipppfeiffer.de/api/data/MeasurementsTablee?lastKey=${encodeURIComponent(lastEvaluatedKey || '')}`);
         
         if (!response.ok) {
             // Fehlerhafte Antwort vom Server
