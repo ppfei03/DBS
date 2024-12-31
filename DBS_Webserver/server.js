@@ -89,6 +89,7 @@ app.get('/api/data/:tableName', async (req, res) => {
 
 app.get('/api/data/:tableNameLasy', async (req, res) => {
     const { tableName } = req.params;
+    tableName = tableName.replace("Lasy", "");
     const { lastKey } = req.query;
     await dynamoDbScan(tableName, res, 50, lastKey);
 });
