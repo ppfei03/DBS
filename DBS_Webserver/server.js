@@ -101,8 +101,8 @@ app.get('/api/data/:tableName', async (req, res) => {
 app.get('/run-python/insertData', (req, res) => runPythonScript('importDataToDynamoDB.py', res));
 app.get('/run-python/insertDataMeasure', (req, res) => runPythonScript('importMeasureToDynamoDB.py', res));
 app.get('/run-python/deleteDataAndTable', (req, res) => runPythonScript('deleteTablesAndData.py', res));
-app.get('/run-python/insertTable', (req, res) => runPythonScript('deleteTablesAndData.py', res));
-app.get('/run-python/deleteAllData', (req, res) => runPythonScript('insertTables.py', res));
+app.get('/run-python/deleteAllData', (req, res) => runPythonScript('deleteTablesAndData.py', res));
+app.get('/run-python/insertTable', (req, res) => runPythonScript('insertTables.py', res));
 
 
 // API-Route für die Abfrage
