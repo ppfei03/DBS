@@ -17,7 +17,7 @@ app.use(cors({
     credentials: true,
 }));
 
-app.use(cors())
+//app.use(cors())
 
 // Statische Dateien bereitstellen
 app.use(express.static('public'));
