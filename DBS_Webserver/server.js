@@ -163,7 +163,7 @@ app.get('/api/data/MeasurementsTableLasy', async (req, res) => {
 // API-Route zum Ausführen des Python-Skripts
 app.get('/run-python/insertData', (req, res) => {
     // Relativer Pfad zum Python-Skript
-    const scriptPath = path.join(__dirname, 'scripts', 'ImportDataToDynamoDB.py');
+    const scriptPath = path.join(__dirname, 'scripts', 'importDataToDynamoDB.py');
 
     exec(`python3 ${scriptPath}`, (error, stdout, stderr) => {
         if (error) {
@@ -182,7 +182,7 @@ app.get('/run-python/insertData', (req, res) => {
 // API-Route zum Ausführen des Python-Skripts
 app.get('/run-python/insertDataMeasure', (req, res) => {
     // Relativer Pfad zum Python-Skript
-    const scriptPath = path.join(__dirname, 'scripts', 'ImportMeasureToDynamoDB.py');
+    const scriptPath = path.join(__dirname, 'scripts', 'importMeasureToDynamoDB.py');
 
     exec(`python3 ${scriptPath}`, (error, stdout, stderr) => {
         if (error) {

@@ -44,7 +44,8 @@ tables = [
         "TableName": "SensorsTable",
         "AttributeDefinitions": [
             {"AttributeName": "sensorId", "AttributeType": "S"},
-            {"AttributeName": "lastMeasurement", "AttributeType": "S"}
+            {"AttributeName": "lastMeasurement", "AttributeType": "S"},
+            {"AttributeName": "unit", "AttributeType": "S"}  # Neues Attribut für GSI
         ],
         "KeySchema": [
             {"AttributeName": "sensorId", "KeyType": "HASH"}
@@ -58,6 +59,15 @@ tables = [
                 ],
                 "Projection": {
                     "ProjectionType": "ALL"
+                }
+            },
+            {
+                "IndexName": "UnitIndex",  # Neuer Index
+                "KeySchema": [
+                    {"AttributeName": "unit", "KeyType": "HASH"}  # unit als Partition Key
+                ],
+                "Projection": {
+                    "ProjectionType": "ALL"  # Alle Attribute im Index verfügbar
                 }
             }
         ]
