@@ -106,17 +106,22 @@ app.get('/run-python/deleteAllData', (req, res) => runPythonScript('insertTables
 
 
 // API-Route für die Abfrage
-app.get('/api/data/sensorsMitPhaenomen', async (req, res) => {
-    const { Phaenomen } = req.query;
+app.get('/api/sensors', async (req, res) => {
+    const { unit } = req.query;
+
+    if (!unit) {
+        return res.status(400).json({ error: 'Einheit (unit) ist erforderlich.' });
+    }
+
     const params = {
         TableName: 'SensorsTable',
         IndexName: 'UnitIndex',
         KeyConditionExpression: '#unit = :unitValue',
         ExpressionAttributeNames: {
-            '#unit': 'unit', // Platzhalter für reserviertes Schlüsselwort
+            '#unit': 'unit',
         },
         ExpressionAttributeValues: {
-            ':unitValue': { S: '°C' }, // Suchwert
+            ':unitValue': { S: unit },
         },
     };
 
