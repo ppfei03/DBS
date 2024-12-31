@@ -6,19 +6,20 @@
     <title>Verlaufskurve - °C</title>
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chart.js Zoom Plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
-            text-align: center;
         }
         h1 {
             color: #333;
         }
         canvas {
             margin-top: 20px;
-            max-width: 100%;
-            height: calc(100vh - 150px); /* Dynamische Höhe basierend auf Fensterhöhe */
+            max-width: 80%;
+            height: calc(100vh - 150px); /* Passt die Höhe dynamisch an die Fensterhöhe an */
         }
         .buttons {
             margin: 20px 0;
@@ -65,8 +66,8 @@
     const iqr = q3 - q1;
 
     // Wertebereich für Ausreißerbereinigung
-    const lowerBound = q1 - 1.5 * iqr;
-    const upperBound = q3 + 1.5 * iqr;
+    const lowerBound = q1 - 1 * iqr;
+    const upperBound = q3 + 1 * iqr;
 
     return { lowerBound, upperBound };
 }
@@ -126,13 +127,12 @@ async function fetchTemperatureData() {
                         backgroundColor: 'rgba(75, 192, 192, 0.2)',
                         borderWidth: 2,
                         pointRadius: 3,
-                        pointHoverRadius: 6,
+                        pointHoverRadius: 6, // Größere Punkte beim Hover
                         pointBackgroundColor: 'rgba(75, 192, 192, 1)',
                     }]
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false,
                     interaction: {
                         mode: 'nearest',
                         intersect: false,
@@ -144,6 +144,21 @@ async function fetchTemperatureData() {
                                     const value = context.raw.toFixed(2); // Zwei Nachkommastellen
                                     return `Wert: ${value} °C`;
                                 }
+                            }
+                        },
+                        zoom: {
+                            zoom: {
+                                wheel: {
+                                    enabled: true // Aktiviert Zoomen mit dem Mausrad
+                                },
+                                pinch: {
+                                    enabled: true // Aktiviert Zoomen per Touch
+                                },
+                                mode: 'x', // Nur horizontal zoomen
+                            },
+                            pan: {
+                                enabled: true, // Aktiviert Schwenken
+                                mode: 'x', // Nur horizontal schwenken
                             }
                         }
                     },
@@ -166,19 +181,8 @@ async function fetchTemperatureData() {
             });
         }
 
-        // Funktion, um die Canvas-Höhe dynamisch anzupassen
-        function adjustCanvasHeight() {
-            const canvas = document.getElementById('temperatureChart');
-            const headerHeight = document.querySelector('h1').offsetHeight + document.querySelector('.buttons').offsetHeight + 40;
-            canvas.style.height = `${window.innerHeight - headerHeight}px`;
-        }
-
-        // Initiale Anpassung und auf Änderungen der Fenstergröße reagieren
-        window.addEventListener('resize', adjustCanvasHeight);
-        window.addEventListener('load', () => {
-            adjustCanvasHeight();
-            fetchTemperatureData();
-        });
+        // Daten abrufen und Diagramm erstellen
+        fetchTemperatureData();
     </script>
 </body>
 </html>
