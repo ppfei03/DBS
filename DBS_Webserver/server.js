@@ -11,7 +11,7 @@ const PORT = 3000;
 const dynamoDbClient = new DynamoDBClient({ region: 'us-east-1' });
 
 // CORS konfigurieren
-const allowedOrigins = ['https://dbs.philipppfeiffer.de','https://api.philipppfeiffer.de', 'http://77.20.250.44']
+const allowedOrigins = ['https://dbs.philipppfeiffer.de','https://api.philipppfeiffer.de']
 
 app.use(cors({
     origin: (origin, callback) => {
@@ -25,8 +25,7 @@ app.use(cors({
 
 
 
-// Statische Dateien bereitstellen
-app.use(express.static('public'));
+
 
 // Middleware zur Protokollierung der eingehenden Verbindungen
 app.use((req, res, next) => {
@@ -35,6 +34,12 @@ app.use((req, res, next) => {
     next();
 });
 
+
+/**
+// Statische Dateien bereitstellen
+app.use(express.static('public'));
+
+ 
 // Standardroute für den Zugriff auf index
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
@@ -51,7 +56,7 @@ app.get('/:file', (req, res, next) => {
         }
     });
 });
-
+*/
 // Funktion zum Ausführen von Python-Skripten
 const runPythonScript = (scriptName, res) => {
     const scriptPath = path.join(__dirname, 'scripts', scriptName);
