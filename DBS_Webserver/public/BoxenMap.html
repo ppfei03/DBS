@@ -7,12 +7,45 @@
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        #map {
-            height: 100vh; /* Karte soll die gesamte Höhe des Bildschirms einnehmen */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
         }
+        #map {
+            height: 80vh; /* Karte soll 80% der Höhe einnehmen */
+        }
+        .buttons {
+            margin: 20px 0;
+        }
+        .button {
+            display: inline-block;
+            margin: 10px;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+
     </style>
 </head>
 <body>
+    <!-- Buttons -->
+    <div class="buttons">
+        <a href="index.html" class="button">Start</a>
+        <a href="AlleBoxen.html" class="button">Alle Boxen</a>
+        <a href="AlleSensoren.html" class="button">Alle Sensoren</a>
+        <a href="AlleMeasurements.html" class="button">Alle Messungen</a>
+        <a href="BoxenMap.html" class="button">->Map<-</a>
+    </div>
+
     <div id="map"></div>
 
     <!-- Leaflet JS -->
