@@ -100,8 +100,41 @@ app.get('/api/data/:tableName', async (req, res) => {
 // Python-Skript-API-Routen
 app.get('/run-python/insertData', (req, res) => runPythonScript('importDataToDynamoDB.py', res));
 app.get('/run-python/insertDataMeasure', (req, res) => runPythonScript('importMeasureToDynamoDB.py', res));
-app.get('/run-python/deleteData', (req, res) => runPythonScript('deleteTablesAndData.py', res));
-app.get('/run-python/deleteAllData', (req, res) => runPythonScript('deleteAllItems.py', res));
+app.get('/run-python/deleteDataAndTable', (req, res) => runPythonScript('deleteTablesAndData.py', res));
+app.get('/run-python/insertTable', (req, res) => runPythonScript('deleteTablesAndData.py', res));
+app.get('/run-python/deleteAllData', (req, res) => runPythonScript('insertTables.py', res));
+
+
+// API-Route für die Abfrage
+app.get('/api/data/sensorsMitPhaenomen', async (req, res) => {
+    const { Phaenomen } = req.query;
+    const params = {
+        TableName: 'SensorsTable',
+        IndexName: 'UnitIndex',
+        KeyConditionExpression: '#unit = :unitValue',
+        ExpressionAttributeNames: {
+            '#unit': 'unit', // Platzhalter für reserviertes Schlüsselwort
+        },
+        ExpressionAttributeValues: {
+            ':unitValue': { S: Phaenomen }, // Suchwert
+        },
+    };
+
+    try {
+        const command = new QueryCommand(params);
+        const data = await dynamoDbClient.send(command);
+
+        res.json({
+            items: data.Items,
+            count: data.Count,
+            scannedCount: data.ScannedCount,
+        });
+    } catch (err) {
+        console.error('Fehler bei der Abfrage:', err);
+        res.status(500).json({ error: 'Fehler beim Abrufen der Daten.', details: err.message });
+    }
+});
+
 
 // Server starten
 app.listen(PORT, () => {
