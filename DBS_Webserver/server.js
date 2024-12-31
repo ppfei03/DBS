@@ -12,9 +12,10 @@ const dynamoDbClient = new DynamoDBClient({ region: 'us-east-1' });
 
 const cors = require('cors');
 app.use(cors({
-    origin: 'https://philipppfeiffer.de', // Hauptdomain bei Netlify
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    origin: ['https://philipppfeiffer.de', 'https://api.philipppfeiffer.de'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE']
 }));
+
 
 
 
