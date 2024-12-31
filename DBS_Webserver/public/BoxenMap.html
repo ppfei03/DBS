@@ -83,7 +83,7 @@
                     // Marker auf der Karte platzieren
                     L.marker([lat, lon])
                         .addTo(map)
-                        .bindPopup(`<b>${boxName}</b><br>State: ${box.state.S}`);
+                        .bindPopup(`<b>${boxName}</b><br>Standort: ${box.exposure.S}`);
                 });
             } catch (error) {
                 console.error('Fehler beim Abrufen der Boxen:', error);
