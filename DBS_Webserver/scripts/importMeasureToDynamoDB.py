@@ -60,6 +60,11 @@ def fetch_sensors():
     print(f"{len(sensors)} Sensoren gefunden.")
     return sensors
 
+def format_timestamp_rfc3339(dt):
+    """Format datetime im RFC3339-Format ohne Mikrosekunden."""
+    return dt.isoformat(timespec='seconds') + 'Z'  # 'Z' für UTC-Zeit anhängen
+
+
 # Hauptfunktion
 def main():
     sensors = fetch_sensors()
@@ -70,14 +75,14 @@ def main():
         sensor_id = sensor['sensorId']
 
         # Neustes Datum aus der MeasurementsTable abrufen
-        latest_date = get_latest_measurement_date(box_id)
+        latest_date = get_latest_measurement_date(box_id, sensor_id)
 
         if latest_date:
             from_date = latest_date
         else:
-            from_date = (now - timedelta(hours=48)).isoformat()  # 48 Stunden zurück
+            from_date = format_timestamp_rfc3339(now - timedelta(hours=48))  # 48 Stunden zurück
 
-        to_date = now.isoformat()
+        to_date = format_timestamp_rfc3339(now)
 
         # Messdaten abrufen und importieren
         measurements = fetch_sensor_data(box_id, sensor_id, from_date, to_date)
@@ -86,6 +91,7 @@ def main():
             import_measurements(box_id, sensor_id, measurements)
         else:
             print(f"Keine neuen Messwerte für Sensor {sensor_id} gefunden.")
+
 
 
 if __name__ == "__main__":
