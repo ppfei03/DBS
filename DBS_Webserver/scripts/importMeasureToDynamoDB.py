@@ -8,9 +8,10 @@ sensors_table = dynamodb.Table("SensorsTable")
 measurements_table = dynamodb.Table("MeasurementsTable")
 
 # Funktion, um das neuste Datum aus der MeasurementsTable zu holen
-def get_latest_measurement_date(sensor_id):
+def get_latest_measurement_date(box_id, sensor_id):
     response = measurements_table.query(
-        KeyConditionExpression=boto3.dynamodb.conditions.Key('sensorId').eq(sensor_id),
+        KeyConditionExpression=boto3.dynamodb.conditions.Key('boxId').eq(box_id) &
+                               boto3.dynamodb.conditions.Key('sensorId').eq(sensor_id),
         ScanIndexForward=False,  # Sortiert nach dem neuesten Datum
         Limit=1
     )
@@ -18,6 +19,7 @@ def get_latest_measurement_date(sensor_id):
         return response['Items'][0]['createdAt']  # Rückgabe des neuesten Datums
     else:
         return None
+
 
 # Funktion, um die Messdaten eines Sensors zu holen
 def fetch_sensor_data(box_id, sensor_id, from_date, to_date):
@@ -68,7 +70,7 @@ def main():
         sensor_id = sensor['sensorId']
 
         # Neustes Datum aus der MeasurementsTable abrufen
-        latest_date = get_latest_measurement_date(sensor_id)
+        latest_date = get_latest_measurement_date(box_id, sensor_id)
 
         if latest_date:
             from_date = latest_date
@@ -84,6 +86,7 @@ def main():
             import_measurements(box_id, sensor_id, measurements)
         else:
             print(f"Keine neuen Messwerte für Sensor {sensor_id} gefunden.")
+
 
 if __name__ == "__main__":
     main()
