@@ -10,17 +10,19 @@ const PORT = 3000;
 // DynamoDB Client konfigurieren
 const dynamoDbClient = new DynamoDBClient({ region: 'us-east-1' });
 
-// CORS konfigurieren
-const allowedOrigins = ['https://dbs.philipppfeiffer.de','https://api.philipppfeiffer.de']
+
+const allowedOrigins = ['https://dbs.philipppfeiffer.de'];
 
 app.use(cors({
     origin: (origin, callback) => {
         if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
-            callback(new Error('Zugriff nicht erlaubt.'));
+            callback(new Error('Nicht autorisierter Zugriff.'));
         }
     },
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Erlaubte HTTP-Methoden
+    credentials: true, // Erlaubt das Setzen von Cookies oder Headern wie Authorization
 }));
 
 
@@ -57,6 +59,7 @@ app.get('/:file', (req, res, next) => {
     });
 });
 */
+
 // Funktion zum Ausführen von Python-Skripten
 const runPythonScript = (scriptName, res) => {
     const scriptPath = path.join(__dirname, 'scripts', scriptName);
