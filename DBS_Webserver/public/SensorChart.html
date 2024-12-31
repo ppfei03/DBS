@@ -117,7 +117,7 @@
                 if (data.measurements && data.measurements.length > 0) {
                     let measurements = data.measurements;
                     measurements.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-                    measurements = removeOutliers(measurements);
+                    measurements = measurements//removeOutliers(measurements);
                     const labels = measurements.map(measurement => new Date(measurement.createdAt).toLocaleString());
                     const values = measurements.map(measurement => parseFloat(measurement.value));
                     createChart(labels, values);
