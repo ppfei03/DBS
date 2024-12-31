@@ -80,7 +80,7 @@ def main():
         if latest_date:
             from_date = latest_date
         else:
-            from_date = format_timestamp_rfc3339(now - timedelta(hours=72))  # 48 Stunden zurück
+            from_date = format_timestamp_rfc3339(now - timedelta(hours=5))  # 48 Stunden zurück
 
         to_date = format_timestamp_rfc3339(now)
 
