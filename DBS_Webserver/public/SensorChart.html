@@ -57,32 +57,63 @@
     <canvas id="temperatureChart"></canvas>
 
     <script>
-        async function fetchTemperatureData() {
-            try {
-                const response = await fetch('https://api.philipppfeiffer.de/api/sensor-measurements?unit=°C');
-                const data = await response.json();
+        function calculateIQR(values) {
+    // Sortiere Werte
+    const sorted = [...values].sort((a, b) => a - b);
 
-                if (data.measurements && data.measurements.length > 0) {
-                    const measurements = data.measurements;
+    // Quartile berechnen
+    const q1 = sorted[Math.floor((sorted.length / 4))];
+    const q3 = sorted[Math.ceil((sorted.length * (3 / 4))) - 1];
+    const iqr = q3 - q1;
 
-                    // Sortiere Messungen nach Zeit
-                    measurements.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+    // Wertebereich für Ausreißerbereinigung
+    const lowerBound = q1 - 1.5 * iqr;
+    const upperBound = q3 + 1.5 * iqr;
 
-                    // Extrahiere die Zeitstempel und Werte
-                    const labels = measurements.map(measurement => new Date(measurement.createdAt).toLocaleString());
-                    const values = measurements.map(measurement => parseFloat(measurement.value));
+    return { lowerBound, upperBound };
+}
 
-                    // Diagramm erstellen
-                    createChart(labels, values);
-                } else {
-                    console.error('Keine Messwerte gefunden.');
-                    document.body.innerHTML += '<p>Keine Messwerte verfügbar.</p>';
-                }
-            } catch (err) {
-                console.error('Fehler beim Abrufen der API:', err);
-                document.body.innerHTML += '<p>Fehler beim Abrufen der Daten.</p>';
-            }
+function removeOutliers(data) {
+    const values = data.map(d => parseFloat(d.value));
+    const { lowerBound, upperBound } = calculateIQR(values);
+
+    // Werte innerhalb des Bereichs behalten
+    return data.filter(d => {
+        const value = parseFloat(d.value);
+        return value >= lowerBound && value <= upperBound;
+    });
+}
+
+async function fetchTemperatureData() {
+    try {
+        const response = await fetch('https://api.philipppfeiffer.de/api/sensor-measurements?unit=°C');
+        const data = await response.json();
+
+        if (data.measurements && data.measurements.length > 0) {
+            let measurements = data.measurements;
+
+            // Sortiere Messungen nach Zeit
+            measurements.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+
+            // Bereinigung der Daten (Entfernen von Ausreißern)
+            measurements = removeOutliers(measurements);
+
+            // Extrahiere die Zeitstempel und Werte
+            const labels = measurements.map(measurement => new Date(measurement.createdAt).toLocaleString());
+            const values = measurements.map(measurement => parseFloat(measurement.value));
+
+            // Diagramm erstellen
+            createChart(labels, values);
+        } else {
+            console.error('Keine Messwerte gefunden.');
+            document.body.innerHTML += '<p>Keine Messwerte verfügbar.</p>';
         }
+    } catch (err) {
+        console.error('Fehler beim Abrufen der API:', err);
+        document.body.innerHTML += '<p>Fehler beim Abrufen der Daten.</p>';
+    }
+}
+
 
         function createChart(labels, data) {
             const ctx = document.getElementById('temperatureChart').getContext('2d');
