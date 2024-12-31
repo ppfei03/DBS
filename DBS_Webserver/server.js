@@ -142,7 +142,7 @@ app.get('/api/sensors', async (req, res) => {
 
 
 // API: Sensoren mit einer bestimmten Einheit und ihre Messwerte abrufen
-app.get('/api/sensor-measurements', async (req, res) => {
+app.get('/api/sensor-measurements2', async (req, res) => {
     const { unit } = req.query;
 
     if (!unit) {
@@ -200,6 +200,102 @@ app.get('/api/sensor-measurements', async (req, res) => {
 
         // Ergebnisse zurückgeben
         res.json({ sensors: sensors.length, measurements });
+    } catch (err) {
+        console.error('Fehler beim Abrufen der Daten:', err);
+        res.status(500).json({ error: 'Fehler beim Abrufen der Daten.', details: err.message });
+    }
+});
+
+
+app.get('/api/sensor-measurements', async (req, res) => {
+    const { unit, lastSensorKey, lastMeasurementKey } = req.query;
+
+    if (!unit) {
+        return res.status(400).json({ error: 'Einheit (unit) muss angegeben werden.' });
+    }
+
+    try {
+        // 1. Sensoren mit der gewünschten Einheit abrufen
+        const sensorsParams = {
+            TableName: 'SensorsTable',
+            IndexName: 'UnitIndex',
+            KeyConditionExpression: '#unit = :unitValue',
+            ExpressionAttributeNames: {
+                '#unit': 'unit',
+            },
+            ExpressionAttributeValues: {
+                ':unitValue': { S: unit },
+            },
+            Limit: 50, // Anzahl der Sensoren pro Seite
+        };
+
+        // Falls ein `lastKey` für Sensoren vorhanden ist, hinzufügen
+        if (lastSensorKey) {
+            sensorsParams.ExclusiveStartKey = JSON.parse(decodeURIComponent(lastSensorKey));
+        }
+
+        const sensorsCommand = new QueryCommand(sensorsParams);
+        const sensorsResponse = await dynamoDbClient.send(sensorsCommand);
+        const sensors = sensorsResponse.Items || [];
+        const nextSensorKey = sensorsResponse.LastEvaluatedKey
+            ? encodeURIComponent(JSON.stringify(sensorsResponse.LastEvaluatedKey))
+            : null;
+
+        if (sensors.length === 0) {
+            return res.json({ message: 'Keine Sensoren mit der angegebenen Einheit gefunden.', measurements: [] });
+        }
+
+        // 2. Messwerte für jeden Sensor abrufen (Lazy Loading für Messwerte)
+        const measurements = [];
+        for (const sensor of sensors) {
+            const sensorId = sensor.sensorId.S;
+
+            // Messwerte für den aktuellen Sensor abrufen
+            const measurementsParams = {
+                TableName: 'MeasurementsTable',
+                FilterExpression: '#sensorId = :sensorIdValue',
+                ExpressionAttributeNames: {
+                    '#sensorId': 'sensorId',
+                },
+                ExpressionAttributeValues: {
+                    ':sensorIdValue': { S: sensorId },
+                },
+                Limit: 50, // Anzahl der Messwerte pro Seite
+            };
+
+            // Falls ein `lastKey` für Messwerte vorhanden ist, hinzufügen
+            if (lastMeasurementKey) {
+                measurementsParams.ExclusiveStartKey = JSON.parse(decodeURIComponent(lastMeasurementKey));
+            }
+
+            const measurementsCommand = new ScanCommand(measurementsParams);
+            const measurementsResponse = await dynamoDbClient.send(measurementsCommand);
+
+            measurements.push(...measurementsResponse.Items.map(item => ({
+                sensorId: item.sensorId.S,
+                value: item.value.S,
+                createdAt: item.createdAt.S,
+                boxId: item.boxId.S,
+            })));
+
+            // Optional: Stoppen nach einer Seite von Messwerten (Lazy Loading)
+            if (measurementsResponse.LastEvaluatedKey) {
+                return res.json({
+                    sensors: sensors.length,
+                    measurements,
+                    lastSensorKey: nextSensorKey,
+                    lastMeasurementKey: encodeURIComponent(JSON.stringify(measurementsResponse.LastEvaluatedKey)),
+                });
+            }
+        }
+
+        // Ergebnisse zurückgeben
+        res.json({
+            sensors: sensors.length,
+            measurements,
+            lastSensorKey: nextSensorKey,
+            lastMeasurementKey: null, // Alle Messwerte geladen
+        });
     } catch (err) {
         console.error('Fehler beim Abrufen der Daten:', err);
         res.status(500).json({ error: 'Fehler beim Abrufen der Daten.', details: err.message });
