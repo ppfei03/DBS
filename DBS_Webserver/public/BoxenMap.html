@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Box Map</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha384-GLkB2Yab28GLTe8p9iSwlpZtk48CqTUtMiXP4he/xHLQ5NZ8Kv7Fmd5z6bTkIoTU" crossorigin=""/>
+    <style>
+        #map {
+            height: 100vh; /* Karte soll die gesamte Höhe des Bildschirms einnehmen */
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha384-TLKN+fzL5XaWIczV5gkqYyt/xWqRYTfFuQWqOj3wQl4b5Da1UWH2Le4pFYfNpgBO" crossorigin=""></script>
+    <script>
+        // Initialisiere die Karte
+        const map = L.map('map').setView([53.55, 10.0], 10); // Startpunkt Hamburg
+
+        // OpenStreetMap-Tiles hinzufügen
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // API-Daten abrufen und Marker hinzufügen
+        async function fetchBoxes() {
+            try {
+                const response = await fetch('https://api.philipppfeiffer.de/api/data/BoxesTableLasy');
+                const data = await response.json();
+
+                // Items durchlaufen und Marker setzen
+                data.items.forEach(box => {
+                    const boxName = box.boxName.S;
+                    const lat = parseFloat(box.location.L[0].N);
+                    const lon = parseFloat(box.location.L[1].N);
+
+                    // Marker auf der Karte platzieren
+                    L.marker([lat, lon])
+                        .addTo(map)
+                        .bindPopup(`<b>${boxName}</b><br>State: ${box.state.S}`);
+                });
+            } catch (error) {
+                console.error('Fehler beim Abrufen der Boxen:', error);
+            }
+        }
+
+        // Boxen abrufen und auf der Karte anzeigen
+        fetchBoxes();
+    </script>
+</body>
+</html>

@@ -21,10 +21,6 @@ app.use(cors({
 
 app.use(cors());
 
-
-
-
-
 // Statische Dateien bereitstellen
 app.use(express.static('public'));
 
@@ -66,6 +62,7 @@ app.get('/api/data/BoxesTable', async (req, res) => {
         res.status(500).send('Fehler beim Abrufen der Daten');
     }
 });
+
 // API-Route, um Daten aus DynamoDB zu holen
 app.get('/api/data/SensorsTable', async (req, res) => {
     const params = {
@@ -200,6 +197,7 @@ app.get('/run-python/insertDataMeasure', (req, res) => {
         res.send(`Skript erfolgreich ausgeführt: ${stdout}`);
     });
 });
+
     // API-Route zum Ausführen des Python-Skripts
 app.get('/run-python/deleteData', (req, res) => {
     // Relativer Pfad zum Python-Skript
