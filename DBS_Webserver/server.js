@@ -206,8 +206,15 @@ app.get('/api/sensor-measurements', async (req, res) => {
     }
 });
 
-
+/** 
 // Server starten
 app.listen(PORT, () => {
     console.log(`Server läuft auf http://localhost:${PORT}`);
 });
+*/
+
+const server = app.listen(PORT, () => {
+    console.log(`Server läuft auf http://localhost:${PORT}`);
+});
+
+server.timeout = 300000; // 300 Sekunden (5 Minuten)
