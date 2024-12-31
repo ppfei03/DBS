@@ -11,10 +11,16 @@ const dynamoDbClient = new DynamoDBClient({ region: 'us-east-1' });
 
 
 const cors = require('cors');
+/** 
 app.use(cors({
-    origin: ['https://philipppfeiffer.de', 'https://api.philipppfeiffer.de'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE']
+    origin: 'https://dbs.philipppfeiffer.de', // Die erlaubte Origin
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Erlaubte HTTP-Methoden
+    credentials: true // Falls Cookies oder Authentifizierung erforderlich sind
 }));
+*/
+
+app.use(cors());
+
 
 
 
