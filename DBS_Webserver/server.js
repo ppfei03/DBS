@@ -106,7 +106,7 @@ app.get('/run-python/deleteAllData', (req, res) => runPythonScript('insertTables
 
 
 // API-Route für die Abfrage
-app.get('/api/data/sensors', async (req, res) => {
+app.get('/api/sensors', async (req, res) => {
     const { unit } = req.query;
 
     if (!unit) {
@@ -142,7 +142,7 @@ app.get('/api/data/sensors', async (req, res) => {
 
 
 // API: Sensoren mit einer bestimmten Einheit und ihre Messwerte abrufen
-app.get('/api/data/sensor-measurements', async (req, res) => {
+app.get('/api/sensor-measurements', async (req, res) => {
     const { unit } = req.query;
 
     if (!unit) {
