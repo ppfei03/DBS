@@ -1,18 +1,30 @@
 const express = require('express');
-const { DynamoDBClient, ScanCommand, QueryCommand  } = require('@aws-sdk/client-dynamodb');
+const { DynamoDBClient, ScanCommand, QueryCommand } = require('@aws-sdk/client-dynamodb');
 const path = require('path');
 const { exec } = require('child_process');
 const cors = require('cors');
+const winston = require('winston');
 
 const app = express();
 const PORT = 3000;
 
+// Logger konfigurieren
+const logger = winston.createLogger({
+    level: 'info',
+    format: winston.format.combine(
+        winston.format.timestamp(),
+        winston.format.json()
+    ),
+    transports: [
+        new winston.transports.Console(),
+        new winston.transports.File({ filename: 'server.log' })
+    ],
+});
+
 // DynamoDB Client konfigurieren
 const dynamoDbClient = new DynamoDBClient({ region: 'us-east-1' });
 
-
 const allowedOrigins = ['https://dbs.philipppfeiffer.de'];
-
 app.use(cors({
     origin: (origin, callback) => {
         if (!origin || allowedOrigins.includes(origin)) {
@@ -21,57 +33,35 @@ app.use(cors({
             callback(new Error('Nicht autorisierter Zugriff.'));
         }
     },
-    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Erlaubte HTTP-Methoden
-    credentials: true, // Erlaubt das Setzen von Cookies oder Headern wie Authorization
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true,
 }));
-
-
-
-
 
 // Middleware zur Protokollierung der eingehenden Verbindungen
 app.use((req, res, next) => {
     const clientIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-    console.log(`Neue Verbindung von: ${clientIp} - ${req.method} ${req.url}`);
+    logger.info(`Neue Verbindung von: ${clientIp} - ${req.method} ${req.url}`);
     next();
 });
 
-
-/**
-// Statische Dateien bereitstellen
-app.use(express.static('public'));
-
- 
-// Standardroute für den Zugriff auf index
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+// Zentrale Fehlerbehandlungs-Middleware
+app.use((err, req, res, next) => {
+    logger.error(err.message);
+    res.status(500).json({ error: err.message });
 });
-
-// Dynamisches Routing für HTML-Dateien
-app.get('/:file', (req, res, next) => {
-    const fileName = `${req.params.file}.html`; // Anhängen von `` an den Dateinamen
-    const filePath = path.join(__dirname, 'public', fileName);
-    res.sendFile(filePath, (err) => {
-        if (err) {
-            console.error(`Fehler beim Laden der Datei: ${filePath}`);
-            res.status(404).send('Seite nicht gefunden');
-        }
-    });
-});
-*/
 
 // Funktion zum Ausführen von Python-Skripten
 const runPythonScript = (scriptName, res) => {
     const scriptPath = path.join(__dirname, 'scripts', scriptName);
     exec(`python3 ${scriptPath}`, (error, stdout, stderr) => {
         if (error) {
-            console.error(`Fehler beim Ausführen des Python-Skripts: ${error.message}`);
+            logger.error(`Fehler beim Ausführen des Python-Skripts: ${error.message}`);
             res.status(500).send(`Fehler beim Ausführen des Skripts: ${error.message}`);
         } else if (stderr) {
-            console.error(`Fehler im Python-Skript: ${stderr}`);
+            logger.error(`Fehler im Python-Skript: ${stderr}`);
             res.status(500).send(`Fehler im Skript: ${stderr}`);
         } else {
-            console.log(`Ergebnis des Python-Skripts: ${stdout}`);
+            logger.info(`Ergebnis des Python-Skripts: ${stdout}`);
             res.send(`Skript erfolgreich ausgeführt: ${stdout}`);
         }
     });
@@ -91,16 +81,14 @@ const dynamoDbScan = async (tableName, res, limit = null, lastKey = null) => {
             lastKey: data.LastEvaluatedKey ? encodeURIComponent(JSON.stringify(data.LastEvaluatedKey)) : null,
         });
     } catch (err) {
-        console.error(`Fehler beim Abrufen der Daten aus ${tableName}:`, err);
+        logger.error(`Fehler beim Abrufen der Daten aus ${tableName}:`, err);
         res.status(500).send(`Fehler beim Abrufen der Daten: ${err.message}`);
     }
 };
 
 // DynamoDB-API-Routen
-
 app.get('/api/data/:tableName', async (req, res) => {
     const { tableName } = req.params;
-    //tableName = tableName.replace("Lasy", "");
     const { lastKey } = req.query;
     await dynamoDbScan(tableName, res, 50, lastKey);
 });
@@ -111,7 +99,6 @@ app.get('/run-python/insertDataMeasure', (req, res) => runPythonScript('importMe
 app.get('/run-python/deleteDataAndTable', (req, res) => runPythonScript('deleteTablesAndData.py', res));
 app.get('/run-python/deleteAllData', (req, res) => runPythonScript('deleteTablesAndData.py', res));
 app.get('/run-python/insertTable', (req, res) => runPythonScript('insertTables.py', res));
-
 
 // API-Route für die Abfrage
 app.get('/api/sensors', async (req, res) => {
@@ -143,11 +130,10 @@ app.get('/api/sensors', async (req, res) => {
             scannedCount: data.ScannedCount,
         });
     } catch (err) {
-        console.error('Fehler bei der Abfrage:', err);
+        logger.error('Fehler bei der Abfrage:', err);
         res.status(500).json({ error: 'Fehler beim Abrufen der Daten.', details: err.message });
     }
 });
-
 
 // API: Sensoren mit einer bestimmten Einheit und ihre Messwerte abrufen
 app.get('/api/sensor-measurements', async (req, res) => {
@@ -161,7 +147,7 @@ app.get('/api/sensor-measurements', async (req, res) => {
         // 1. Sensoren mit der gewünschten Einheit abrufen
         const sensorsParams = {
             TableName: 'SensorsTable',
-            IndexName: 'UnitIndex', // GSI für 'unit'
+            IndexName: 'UnitIndex',
             KeyConditionExpression: '#unit = :unitValue',
             ExpressionAttributeNames: {
                 '#unit': 'unit',
@@ -209,20 +195,14 @@ app.get('/api/sensor-measurements', async (req, res) => {
         // Ergebnisse zurückgeben
         res.json({ sensors: sensors.length, measurements });
     } catch (err) {
-        console.error('Fehler beim Abrufen der Daten:', err);
+        logger.error('Fehler beim Abrufen der Daten:', err);
         res.status(500).json({ error: 'Fehler beim Abrufen der Daten.', details: err.message });
     }
 });
 
-/** 
 // Server starten
-app.listen(PORT, () => {
-    console.log(`Server läuft auf http://localhost:${PORT}`);
-});
-*/
-
 const server = app.listen(PORT, () => {
-    console.log(`Server läuft auf http://localhost:${PORT}`);
+    logger.info(`Server läuft auf http://localhost:${PORT}`);
 });
 
 server.timeout = 300000; // 300 Sekunden (5 Minuten)
