@@ -200,6 +200,61 @@ app.get('/api/sensor-measurements', async (req, res) => {
     }
 });
 
+// API: Alle Sensoren und Messwerte abrufen, dann auf dem Server nach Einheit filtern
+app.get('/api/all-sensor-measurements', async (req, res) => {
+    const { unit } = req.query;
+
+    if (!unit) {
+        return res.status(400).json({ error: 'Einheit (unit) muss angegeben werden.' });
+    }
+
+    try {
+        // Alle Sensoren abrufen
+        const sensors = [];
+        let lastKey = null;
+        do {
+            const params = {
+                TableName: 'SensorsTable',
+                ExclusiveStartKey: lastKey,
+            };
+            const command = new ScanCommand(params);
+            const data = await dynamoDbClient.send(command);
+            
+            sensors.push(...data.Items);
+            lastKey = data.LastEvaluatedKey;
+        } while (lastKey);
+
+        // Alle Messwerte abrufen
+        const measurements = [];
+        lastKey = null;
+        do {
+            const params = {
+                TableName: 'MeasurementsTable',
+                ExclusiveStartKey: lastKey,
+            };
+            const command = new ScanCommand(params);
+            const data = await dynamoDbClient.send(command);
+            
+            measurements.push(...data.Items);
+            lastKey = data.LastEvaluatedKey;
+        } while (lastKey);
+
+        // Sensoren nach Einheit filtern
+        const filteredSensors = sensors.filter(sensor => sensor.unit.S === unit);
+
+        // Messwerte nach gefilterten Sensoren filtern
+        const filteredMeasurements = measurements.filter(measurement => 
+            filteredSensors.some(sensor => sensor.sensorId.S === measurement.sensorId.S)
+        );
+
+        res.json({ sensors: filteredSensors, measurements: filteredMeasurements });
+    } catch (err) {
+        logger.error('Fehler beim Abrufen der Daten:', err);
+        res.status(500).json({ error: 'Fehler beim Abrufen der Daten.', details: err.message });
+    }
+});
+
+
 // Server starten
 const server = app.listen(PORT, () => {
     logger.info(`Server läuft auf http://localhost:${PORT}`);
