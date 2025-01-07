@@ -179,7 +179,7 @@ app.get('/api/sensor-measurements', async (req, res) => {
                 ExpressionAttributeValues: {
                     ':sensorIdValue': { S: sensorId },
                 },
-                Limit: 30000, // Optional: Begrenzung der Anzahl der zurückgegebenen Messwerte
+                Limit: 50000, // Optional: Begrenzung der Anzahl der zurückgegebenen Messwerte
             };
             const measurementsCommand = new ScanCommand(measurementsParams);
             const measurementsResponse = await dynamoDbClient.send(measurementsCommand);
