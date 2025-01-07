@@ -180,7 +180,7 @@ app.get('/api/sensor-measurements', async (req, res) => {
                     ':sensorIdValue': { S: sensorId },
                 },
             };
-            const measurementsCommand = new ScanCommand(measurementsParams);
+            const measurementsCommand = new QueryCommand(measurementsParams);
             const measurementsResponse = await dynamoDbClient.send(measurementsCommand);
 
             // Messwerte hinzufügen
