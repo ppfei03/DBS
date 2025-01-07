@@ -136,6 +136,7 @@ app.get('/api/sensors', async (req, res) => {
 });
 
 // API: Sensoren mit einer bestimmten Einheit und ihre Messwerte abrufen
+// API: Sensoren mit einer bestimmten Einheit und ihre Messwerte abrufen
 app.get('/api/sensor-measurements', async (req, res) => {
     const { unit } = req.query;
 
@@ -172,7 +173,7 @@ app.get('/api/sensor-measurements', async (req, res) => {
             // Messwerte für den aktuellen Sensor abrufen
             const measurementsParams = {
                 TableName: 'MeasurementsTable',
-                FilterExpression: '#sensorId = :sensorIdValue',
+                KeyConditionExpression: '#sensorId = :sensorIdValue',
                 ExpressionAttributeNames: {
                     '#sensorId': 'sensorId',
                 },
