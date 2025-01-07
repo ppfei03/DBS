@@ -136,7 +136,6 @@ app.get('/api/sensors', async (req, res) => {
 });
 
 // API: Sensoren mit einer bestimmten Einheit und ihre Messwerte abrufen
-// API: Sensoren mit einer bestimmten Einheit und ihre Messwerte abrufen
 app.get('/api/sensor-measurements', async (req, res) => {
     const { unit } = req.query;
 
@@ -173,15 +172,16 @@ app.get('/api/sensor-measurements', async (req, res) => {
             // Messwerte für den aktuellen Sensor abrufen
             const measurementsParams = {
                 TableName: 'MeasurementsTable',
-                KeyConditionExpression: '#sensorId = :sensorIdValue',
+                FilterExpression: '#sensorId = :sensorIdValue',
                 ExpressionAttributeNames: {
                     '#sensorId': 'sensorId',
                 },
                 ExpressionAttributeValues: {
                     ':sensorIdValue': { S: sensorId },
                 },
+                Limit: 1000, // Optional: Begrenzung der Anzahl der zurückgegebenen Messwerte
             };
-            const measurementsCommand = new QueryCommand(measurementsParams);
+            const measurementsCommand = new ScanCommand(measurementsParams);
             const measurementsResponse = await dynamoDbClient.send(measurementsCommand);
 
             // Messwerte hinzufügen
