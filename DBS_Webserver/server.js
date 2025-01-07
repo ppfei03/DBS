@@ -169,27 +169,32 @@ app.get('/api/sensor-measurements', async (req, res) => {
         for (const sensor of sensors) {
             const sensorId = sensor.sensorId.S;
 
-            // Messwerte für den aktuellen Sensor abrufen
-            const measurementsParams = {
-                TableName: 'MeasurementsTable',
-                FilterExpression: '#sensorId = :sensorIdValue',
-                ExpressionAttributeNames: {
-                    '#sensorId': 'sensorId',
-                },
-                ExpressionAttributeValues: {
-                    ':sensorIdValue': { S: sensorId },
-                }
-            };
-            const measurementsCommand = new ScanCommand(measurementsParams);
-            const measurementsResponse = await dynamoDbClient.send(measurementsCommand);
+            let lastKey = null;
+            do {
+                const measurementsParams = {
+                    TableName: 'MeasurementsTable',
+                    FilterExpression: '#sensorId = :sensorIdValue',
+                    ExpressionAttributeNames: {
+                        '#sensorId': 'sensorId',
+                    },
+                    ExpressionAttributeValues: {
+                        ':sensorIdValue': { S: sensorId },
+                    },
+                    ExclusiveStartKey: lastKey,
+                };
+                const measurementsCommand = new ScanCommand(measurementsParams);
+                const measurementsResponse = await dynamoDbClient.send(measurementsCommand);
 
-            // Messwerte hinzufügen
-            measurements.push(...measurementsResponse.Items.map(item => ({
-                sensorId: item.sensorId.S,
-                value: item.value.S,
-                createdAt: item.createdAt.S,
-                boxId: item.boxId.S,
-            })));
+                // Messwerte hinzufügen
+                measurements.push(...measurementsResponse.Items.map(item => ({
+                    sensorId: item.sensorId.S,
+                    value: item.value.S,
+                    createdAt: item.createdAt.S,
+                    boxId: item.boxId.S,
+                })));
+
+                lastKey = measurementsResponse.LastEvaluatedKey;
+            } while (lastKey);
         }
 
         // Ergebnisse zurückgeben
