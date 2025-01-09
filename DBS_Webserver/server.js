@@ -4,6 +4,9 @@ const path = require('path');
 const { exec } = require('child_process');
 const cors = require('cors');
 const winston = require('winston');
+const express = require('express');
+// const cors = require('cors'); // Diese Zeile kann entfernt werden
+const winston = require('winston');
 
 const app = express();
 const PORT = 3000;
@@ -21,9 +24,7 @@ const logger = winston.createLogger({
     ],
 });
 
-// DynamoDB Client konfigurieren
-const dynamoDbClient = new DynamoDBClient({ region: 'us-east-1' });
-
+/* Entfernen Sie diese CORS-Konfiguration
 const allowedOrigins = ['https://dbs.philipppfeiffer.de'];
 app.use(cors({
     origin: (origin, callback) => {
@@ -36,6 +37,7 @@ app.use(cors({
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true,
 }));
+*/
 
 // Middleware zur Protokollierung der eingehenden Verbindungen
 app.use((req, res, next) => {
@@ -43,6 +45,11 @@ app.use((req, res, next) => {
     logger.info(`Neue Verbindung von: ${clientIp} - ${req.method} ${req.url}`);
     next();
 });
+
+// Restlicher Code bleibt unverändert
+// DynamoDB Client konfigurieren
+const dynamoDbClient = new DynamoDBClient({ region: 'us-east-1' });
+
 
 // Zentrale Fehlerbehandlungs-Middleware
 app.use((err, req, res, next) => {
