@@ -187,7 +187,7 @@ app.get('/api/sensor-measurements', async (req, res) => {
                     ExpressionAttributeValues: {
                         ':sensorIdValue': { S: sensorId },
                     },
-                    Limit: 10,  // Limitierung
+                    Limit: 100,  // Limitierung
                     ExclusiveStartKey: lastKey,
                 };
                 try {
