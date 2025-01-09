@@ -67,10 +67,9 @@ const runPythonScript = (scriptName, res) => {
     });
 };
 
-// API-Route für DynamoDB-Scans
-const dynamoDbScan = async (tableName, res, limit = null, lastKey = null) => {
-    const params = { TableName: tableName };
-    if (limit) params.Limit = limit;
+// API-Route für DynamoDB-Scans mit Limitierung und Paginierung
+const dynamoDbScan = async (tableName, res, limit = 10, lastKey = null, retryCount = 0) => {
+    const params = { TableName: tableName, Limit: limit };
     if (lastKey) params.ExclusiveStartKey = JSON.parse(decodeURIComponent(lastKey));
 
     try {
@@ -81,8 +80,15 @@ const dynamoDbScan = async (tableName, res, limit = null, lastKey = null) => {
             lastKey: data.LastEvaluatedKey ? encodeURIComponent(JSON.stringify(data.LastEvaluatedKey)) : null,
         });
     } catch (err) {
-        logger.error(`Fehler beim Abrufen der Daten aus ${tableName}:`, err);
-        res.status(500).send(`Fehler beim Abrufen der Daten: ${err.message}`);
+        if (err.name === 'ProvisionedThroughputExceededException' && retryCount < 5) {
+            const delay = Math.pow(2, retryCount) * 100; // Exponential backoff
+            setTimeout(async () => {
+                await dynamoDbScan(tableName, res, limit, lastKey, retryCount + 1);
+            }, delay);
+        } else {
+            logger.error(`Fehler beim Abrufen der Daten aus ${tableName}:`, err);
+            res.status(500).send(`Fehler beim Abrufen der Daten: ${err.message}`);
+        }
     }
 };
 
@@ -258,7 +264,6 @@ app.get('/api/all-sensor-measurements', async (req, res) => {
         res.status(500).json({ error: 'Fehler beim Abrufen der Daten.', details: err.message });
     }
 });
-
 
 // Server starten
 const server = app.listen(PORT, () => {
